@@ -1034,8 +1034,16 @@ table.tbl tr:last-child td { border-bottom: 0; }
   async function loadDashboard() {
     var result = await sb.from(CLOUD.table || "mapping_state").select("data").eq("id", 1).maybeSingle();
     if (result.error) throw result.error;
-    if (!result.data || !validState(result.data.data)) throw new Error("数据库尚未初始化，请先运行项目中的 supabase/schema.sql");
-    S = result.data.data;
+
+    // PostgREST / 不同客户端响应模式可能返回单行对象，也可能返回数组。
+    // 统一取出第一行，避免数据已成功返回却被误判为“未初始化”。
+    var row = Array.isArray(result.data) ? result.data[0] : result.data;
+    var remoteState = row && row.data;
+    if (!validState(remoteState)) {
+      throw new Error("已经登录，但没有读取到有效的 Mapping 数据。请检查 mapping_state 表中 id=1 的 data 字段。");
+    }
+
+    S = remoteState;
     sbWrite = sb;
     EDIT = true;
     gate.hidden = true;
