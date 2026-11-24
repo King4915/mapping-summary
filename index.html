@@ -1097,14 +1097,10 @@ table.tbl tr:last-child td { border-bottom: 0; }
       try { await loadDashboard(); }
       catch (err) { await sb.auth.signOut(); showLogin(err.message || "读取云端数据失败。"); }
     } else showLogin("");
-    // 只在明确退出登录时显示口令页。
-    // 不要用 !sessionData 判断：Supabase 的 INITIAL_SESSION 等初始化事件
-    // 可能携带 null session，迟到时会把刚登录成功的用户错误踢回口令页。
-    sb.auth.onAuthStateChange(function (event) {
-      if (event === "SIGNED_OUT") {
-        showLogin("");
-      }
-    });
+    // 不在 Supabase 的异步 Auth 事件回调中切换整个页面。
+    // 某些浏览器/初始化时序下，迟到的 SIGNED_OUT 通知可能在登录成功后到达，
+    // 导致刚渲染的看板被清空并重新显示口令窗口。
+    // 登录状态在页面启动时通过 getSession() 检查；用户主动退出时由 logout 按钮处理。
   }
   function unlockEdit(cb) { cb(); } // 已登录的共享账号拥有完整编辑权限
 
@@ -1657,7 +1653,17 @@ table.tbl tr:last-child td { border-bottom: 0; }
     else if (a === "export-json") { exportJSON(); }
     else if (a === "import-json") { document.getElementById("import-file").click(); }
     else if (a === "logout") {
-      if (confirm("确定退出看板？下次访问需要重新输入口令。")) sb.auth.signOut();
+      if (confirm("确定退出看板？下次访问需要重新输入口令。")) {
+        sb.auth.signOut().then(function (result) {
+          if (result && result.error) {
+            setSaveState("退出登录失败：" + result.error.message);
+            return;
+          }
+          showLogin("");
+        }).catch(function (err) {
+          setSaveState("退出登录失败：" + (err.message || "未知错误"));
+        });
+      }
     }
     else if (a === "add-role") {
       unlockEdit(function () {
