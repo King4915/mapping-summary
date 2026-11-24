@@ -912,1086 +912,42 @@ table.tbl tr:last-child td { border-bottom: 0; }
   .hero-stats { grid-template-columns: 1fr 1fr; gap: 8px; }
   .hstat b { font-size: 24px; }
   .org-col { min-width: 140px; }
-}  </style>
+}  
+/* ============ 访问口令窗口 ============ */
+#access-gate{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;padding:24px;background:linear-gradient(135deg,#eef4f2,#f7f4ec)}
+#access-gate[hidden]{display:none}
+.access-card{width:min(420px,100%);background:#fffdf8;border:1px solid #d9e3de;box-shadow:0 24px 80px rgba(30,55,48,.12);padding:34px 32px 30px}
+.access-mark{width:42px;height:42px;display:grid;place-items:center;background:#315e54;color:#fff;font-family:var(--serif);font-size:20px;margin-bottom:22px}
+.access-card h1{font-family:var(--serif);font-size:25px;margin:0;color:#243b35}
+.access-card p{font-size:13px;color:#71817a;line-height:1.8;margin:10px 0 22px}
+.access-card label{display:block;font-size:12px;color:#53665f;margin-bottom:7px}
+.access-card input{width:100%;height:46px;border:1px solid #cbd8d2;background:#fff;padding:0 13px;font-size:15px;outline:none}
+.access-card input:focus{border-color:#315e54;box-shadow:0 0 0 3px rgba(49,94,84,.1)}
+.access-card button{width:100%;height:46px;margin-top:14px;border:0;background:#315e54;color:white;font-size:14px;cursor:pointer}
+.access-card button:disabled{opacity:.55;cursor:wait}
+#access-error{min-height:20px;margin-top:10px;color:#b0524d;font-size:12px}
+.access-foot{margin-top:18px;padding-top:14px;border-top:1px solid #e5ebe7;color:#9aa7a1;font-size:10px;letter-spacing:.08em}
+
+</style>
 </head>
 <body>
-  <div id="app"></div>
+  <section id="access-gate" aria-label="看板访问验证">
+    <form class="access-card" id="access-form">
+      <div class="access-mark">海</div>
+      <h1>核心岗位人才 Mapping</h1>
+      <p>这是内部人才信息看板。请输入访问口令，通过验证后即可查看和编辑全部 Mapping 内容。</p>
+      <label for="access-code">访问口令</label>
+      <input id="access-code" type="password" autocomplete="current-password" placeholder="请输入访问口令" required>
+      <button id="access-submit" type="submit">验证并进入看板</button>
+      <div id="access-error" role="alert"></div>
+      <div class="access-foot">HAIDILAO · TALENT MAPPING HUB · INTERNAL USE</div>
+    </form>
+  </section>
+  <div id="app" style="display:none"></div>
+  <script src="./config.js"></script>
   <script id="embedded-data" type="application/json"></script>
-  <script>/* 核心岗位人才 mapping 汇总 · 数据层
-   来源：9 份方向 mapping 文档（2026-11 版），按岗位重新结构化。 */
-
-window.MAPPING_META = {
-  today: "2026-11-23",
-  title: "核心岗位人才 mapping 汇总",
-  org: "海底捞 · 人力资源管理中心 · 招聘管理组",
-  updatedLabel: "2026-11-23",
-  scopeLine: "覆盖营建、网规、用户运营、品牌、菜单规划、供应链、寿司、零售、西快九个方向"
-};
-
-window.MAPPING_ROLES = [
-  {
-    id: "build",
-    no: "01",
-    name: "营建负责人",
-    dept: "营建发展部",
-    owner: "林莉",
-    deadline: "2026-11-15",
-    source: {
-      label: "营建负责人_人才mapping",
-      url: "https://haidilao.feishu.cn/docx/DGdxdDEeQoE4vXxNJRFcwiPbnGe?302from=wiki"
-    },
-    oneLiner: "从开店前的开发判断，到门店长期运营维护，营建全链路的一号位。",
-    positioning: [
-      "统一负责选址开发、设计、工程施工、设备设施与门店维护，对交付速度、投资成本、工程质量、合规安全和资产效率承担结果责任。",
-      "业务背景为全球门店超过千家的知名餐饮集团，运营复杂度高，要求同时管理多城市、多店型、多品牌的项目组合。"
-    ],
-    scope: ["选址开发", "门店设计", "工程施工", "设备设施", "门店维护"],
-    capabilities: [
-      { t: "规模交付", d: "年度开店与改造计划下按期、按质、按预算交付，管理多城市多品牌项目组合。" },
-      { t: "标准与成本", d: "建立店型原型、设计标准、造价模型、供应商体系与验收机制，保留本地适配能力。" },
-      { t: "全生命周期", d: "新店建设、翻新、维保、能耗、安全与资产退出纳入同一治理框架。" }
-    ],
-    fit: {
-      must: "近五年承担过全国或多区域门店开发与工程项目组合责任，职责至少跨越设计施工与设备设施两个模块。",
-      plus: "管理过 1,000 家以上网络、年度数百家新店或大规模翻新，并处理直营与加盟并存、多品牌复制。",
-      risk: "纯地产选址、纯单项目工程、纯供应商交付或仅做加盟商答疑，不应直接判定为全链路营建负责人。"
-    },
-    pools: [
-      {
-        tier: 1,
-        label: "A 组 · 高复杂度标杆",
-        desc: "直营责任闭环，复杂店型与全国项目组合。",
-        companies: [
-          { name: "百胜（肯德基 / 必胜客）", why: "最高优先。多品牌、多店型、快节奏扩张与存量网络并行；需核实是否真正覆盖选址、施工与维护。" },
-          { name: "麦当劳", why: "最高优先。高开店速度、全球标准本地化与设施生命周期管理；留意开发与营建可能分属不同团队。" },
-          { name: "星巴克", why: "高优先。设计与设备设施能力强；2026 年业务交易导致组织边界变化，需重核汇报线。" },
-          { name: "达美乐（达势股份）", why: "高优先。全直营、外送厨房与批量开店能力强；堂食复杂度低于大型正餐。" }
-        ]
-      },
-      {
-        tier: 2,
-        label: "B 组 · 高速规模化",
-        desc: "高速度复制、加盟工程管控与设备交付。",
-        companies: [
-          { name: "瑞幸咖啡", why: "优先补充。2025 年净增 8,708 家，批量选址、标准店型与设备部署成熟；小店型工程复杂度偏低。" },
-          { name: "蜜雪集团", why: "优先补充。极大规模加盟网络，标准、设备、验收与供应链协同能力强；需确认大型复杂门店经验。" },
-          { name: "霸王茶姬", why: "优先补充。品牌空间一致性与海外复制经验；全链路维护与复杂后厨待核实。" },
-          { name: "古茗", why: "补充池。高密度区域网络与低线城市落地能力强；迁移到大型正餐需验证。" },
-          { name: "塔斯汀", why: "补充池。汉堡后厨比纯饮品更接近餐饮设备；需排查总部是否掌握实际施工与预算决策权。" },
-          { name: "德克士（顶巧餐饮）", why: "补充池。炸鸡设备与加盟工程支持可迁移；官网门店数缺统计日期，需更新。" }
-        ]
-      },
-      {
-        tier: 3,
-        label: "C 组 · 调改与存量优化",
-        desc: "多品牌正餐、批量改造与存量资产优化。",
-        companies: [
-          { name: "九毛九集团", why: "高价值补充。多品牌原型升级与 150 家以上太二门店调改经验；整体规模小于前两组。" },
-          { name: "呷哺呷哺集团", why: "高价值补充。火锅机电、排烟、消防与餐厨设备复杂；2025 年净关店，需区分主动优化与组织收缩。" },
-          { name: "奈雪的茶", why: "补充池。茶饮与烘焙设备结合，存量优化场景多；处于网络收缩期，需核实团队稳定性。" },
-          { name: "小菜园", why: "补充池。正餐厨房与全国扩张可迁移；规模仍低于千店，需核实全国统筹跨度。" }
-        ]
-      }
-    ],
-    shortlist: [
-      { name: "林锐侨", company: "盒马", title: "营建中心总经理 · P9", note: "现负责盒马营建体系，工程线有下属可延伸；互联网零售里最贴近全链路营建的样本。", tier: 1, status: "可接触" },
-      { name: "崇亚酩", company: "星巴克", title: "营建 VP", note: "国际连锁营建体系完整，设计与设备标准成熟；需确认组织调整后的实际职责边界。", tier: 1, status: "需验证" },
-      { name: "沈荣刚", company: "麦当劳", title: "营建方向（职位待核实）", note: "麦当劳体系出身，标准化与项目组合能力强；进入人选阶段前补齐汇报线与团队规模。", tier: 1, status: "需验证" },
-      { name: "王成阳", company: "美团 · 小象", title: "L10", note: "即时零售仓网与门店建设经验，扩张节奏快；大型正餐后厨与长期资产责任需核实。", tier: 2, status: "可接触" },
-      { name: "郜万好", company: "京东 · 零售", title: "P10", note: "零售门店工程与项目管理背景；直营资本开支与复杂店型经验待验证。", tier: 2, status: "可接触" },
-      { name: "郝先生", company: "京东 · 七鲜", title: "营建方向（全名待补）", note: "七鲜店仓协同网络，工程交付节奏快；建议通过七鲜组织图补齐姓名与职责。", tier: 3, status: "待补全" }
-    ],
-    map: [
-      {
-        group: "互联网零售",
-        companies: [
-          { name: "美团 · 小象", people: [{ name: "王成阳", title: "L10" }, { name: "赵先生", title: "待补全" }] },
-          { name: "京东 · 零售", people: [{ name: "郜万好", title: "P10" }] },
-          { name: "京东 · 七鲜", people: [{ name: "郝先生", title: "营建方向" }] },
-          { name: "阿里 · 盒马", people: [{ name: "林锐侨", title: "营建中心总经理 P9" }, { name: "闫先生", title: "工程 P8" }] }
-        ]
-      },
-      {
-        group: "餐饮连锁",
-        companies: [
-          { name: "星巴克", people: [{ name: "崇亚酩", title: "营建 VP" }] },
-          { name: "麦当劳", people: [{ name: "沈荣刚", title: "营建方向" }] },
-          { name: "肯德基 / 必胜客", people: [{ name: "待补", title: "开发、工程、设施分线寻访" }] },
-          { name: "达美乐 / 瑞幸", people: [{ name: "待补", title: "优先补批量开店与设备体系人选" }] }
-        ]
-      }
-    ],
-    keywords: ["开发", "营建", "工程", "店铺建设", "设施设备", "维修", "资产", "首席发展官", "全国负责人"],
-    interview: [
-      "全链路还是单模块：用一个真实门店项目说明从点位判断、设计、报批、招采、施工、开业到维护，哪些事项由本人最终拍板。",
-      "规模还是复杂度：同时在建多少家、覆盖多少城市与店型；最复杂项目的厨房、机电、消防、排烟与工期难点。",
-      "交付还是经营结果：如何衡量投资额、造价偏差、返工、故障、停业时间、能耗与资产退出。",
-      "直营还是加盟管控：直营与加盟项目分别掌握哪些预算、供应商、验收与整改权力。",
-      "个人贡献还是平台红利：拆解团队基线、本人决策、实际动作与量化结果。"
-    ],
-    risk: "古茗、霸王茶姬等门店规模很大，但以加盟和小店型为主，只列为规模化补充池，不等同于复杂餐饮集团的全链路营建一号位。"
-  },
-
-  {
-    id: "network",
-    no: "02",
-    name: "网规拓展负责人",
-    dept: "营建发展部",
-    owner: "张善彤",
-    deadline: "2026-11-30",
-    source: {
-      label: "网规拓展负责人_人才mapping",
-      url: "https://haidilao.feishu.cn/wiki/WnVcw5y2wiRErQkYXswcjk9unzf"
-    },
-    oneLiner: "规划与开发双线并行：既要算清一张全国网络，也要把每一家店签下来。",
-    positioning: [
-      "网络规划线负责全国门店网络战略布局、城市分级、商圈分层、密度测算、市场容量评估与年度网点规划。",
-      "门店开发线负责选址落地、物业寻找与评估、租金谈判、签约、新店筹备开业与进度管控；同时承担存量门店健康度评估和低效店关停迁址。"
-    ],
-    scope: ["网络规划", "选址开发", "物业谈判", "存量优化", "拓展 SOP"],
-    capabilities: [
-      { t: "城市与商圈", d: "懂城市分级、商圈建模、GIS 与开店 ROI 测算，有全国多品牌网络规划操盘经验。" },
-      { t: "开发落地", d: "从物业寻源、商务谈判到签约开业的全流程推进与进度管控。" },
-      { t: "组织与协同", d: "带过网规分析、商圈研究与开发团队，能联动运营、财务、供应链制定开店准入标准。" }
-    ],
-    fit: {
-      must: "8–12 年连锁餐饮 / 零售网络规划与网点拓展经验，3 年以上团队管理经验。",
-      plus: "搭建过品牌内部选址评估模型；做过存量门店网络优化；有全国市场拓展策略落地经验。",
-      risk: "只懂网规策略缺开发落地，或只做物业谈判缺网络规划，均不满足双线要求。"
-    },
-    pools: [
-      {
-        tier: 1,
-        label: "第一梯队 · 业态与体系双对标",
-        desc: "门店规模大，网规与选址开发体系最成熟。",
-        companies: [
-          { name: "百胜", why: "2025 年末 18,101 家、覆盖 2,500+ 城镇，全年净增 1,706 家；网规 + 开发体系最成熟，人才池最大。" },
-          { name: "麦当劳", why: "网规与开发双体系标准化，擅长量化选址模型与网络规划。" },
-          { name: "美团小象", why: "前置仓超 2,000 个，社区网格化布局与线上线下融合网络。" },
-          { name: "京东七鲜", why: "「1 店 + N 仓」模式，店仓协同网点布局成熟。" },
-          { name: "盒马", why: "多业态门店 + 前置仓，社区商圈密度测算与融合选址经验强。" }
-        ]
-      },
-      {
-        tier: 2,
-        label: "第二梯队 · 同赛道高增速",
-        desc: "扩张迅猛、数据驱动打法领先，人才可迁移。",
-        companies: [
-          { name: "星巴克", why: "点位评估与商圈模型体系成熟，正加速县域下沉。" },
-          { name: "瑞幸咖啡", why: "2025 年净增 8,708 家，热力建模与快速开店能力领先。" },
-          { name: "霸王茶姬", why: "规模化开发与网络管控能力强，可带来高速扩张打法。" }
-        ]
-      },
-      {
-        tier: 3,
-        label: "第三梯队 · 大型零售",
-        desc: "非餐饮业态，但网点规划与单店投资测算能力成熟。",
-        companies: [
-          { name: "名创优品", why: "2025 年末全球 8,485 家，规模化选址与网点密度管控能力强。" },
-          { name: "沃尔玛（含山姆）", why: "严选商圈与单店投资回报测算严格，可提升门店质量管控。" }
-        ]
-      }
-    ],
-    shortlist: [
-      { name: "王芳", company: "盒马", title: "全国策略联盟总监 · P7", note: "麦当劳 + 盒马双背景；现负责业务规划、网规与策略，虚线兼管东区、西区开发团队，规划与开发双线均有覆盖。", tier: 1, status: "重点接触" }
-    ],
-    map: [
-      {
-        group: "头部餐饮连锁",
-        companies: [
-          { name: "百胜", people: [{ name: "待补", title: "网络规划高级经理 / 开发选址总监" }] },
-          { name: "麦当劳", people: [{ name: "待补", title: "地产拓展总监" }] }
-        ]
-      },
-      {
-        group: "即时零售",
-        companies: [
-          { name: "美团 · 小象", people: [{ name: "待补", title: "选址拓展负责人 / 全国拓展总监" }] },
-          { name: "京东 · 七鲜", people: [{ name: "待补", title: "门店拓展负责人 / 选址开发总监" }] },
-          { name: "盒马", people: [{ name: "王芳", title: "全国策略联盟总监 P7" }] }
-        ]
-      },
-      {
-        group: "头部茶饮",
-        companies: [
-          { name: "星巴克", people: [{ name: "待补", title: "地产拓展 / 网络规划负责人" }] },
-          { name: "瑞幸", people: [{ name: "待补", title: "网络规划 & 拓展高级经理" }] },
-          { name: "霸王茶姬", people: [{ name: "待补", title: "全国拓展负责人" }] }
-        ]
-      },
-      {
-        group: "大型零售",
-        companies: [
-          { name: "沃尔玛", people: [{ name: "待补", title: "地产拓展 / 选址开发负责人" }] },
-          { name: "名创优品", people: [{ name: "待补", title: "全国拓展总监" }] }
-        ]
-      }
-    ],
-    keywords: ["网络规划总监", "门店开发 / 拓展总监", "全国网点拓展负责人", "GIS 选址建模", "物业谈判 / 租金商务", "开店 ROI 测算", "New store planning"],
-    interview: [
-      "规划型 vs 开发型：本岗要求两者兼有，重点甄别只做策略或只做谈判的候选人。",
-      "直营开发 vs 加盟 / 平台：直营多门店开发更贴近海底捞，需验证筹备落地与门店履约能力。",
-      "模型能力 vs 落地能力：建模强不等于本土商圈博弈与商场招商谈判强，要看双线落地案例。"
-    ],
-    risk: "当前在册候选人仅 1 位，名单厚度不足；11-30 截止前需通过猎头补齐第一梯队五家公司的具体人选。"
-  },
-
-  {
-    id: "usergrowth",
-    no: "03",
-    name: "用户运营负责人",
-    dept: "用户运营部",
-    owner: "王祺中",
-    deadline: "2026-11-15",
-    source: {
-      label: "跨行业用户增长团队_人才mapping",
-      url: "https://haidilao.feishu.cn/docx/Etvjd3FQro0rWbxRtQHcqxh3nkc"
-    },
-    oneLiner: "从 0 到亿级会员的操盘手，且能理解门店与服务，而不只是流量采买。",
-    positioning: [
-      "统管会员、私域、数字化运营与用户产品的一级部门负责人，向 CEO 或董事会汇报的 VP 级人选。",
-      "需要餐饮或零售高频消费场景经验、亿级会员 / 私域体系搭建经历，并理解海底捞「服务 + 体验」的基因。"
-    ],
-    scope: ["会员体系", "私域运营", "数字化增长", "用户产品", "跨品牌权益"],
-    capabilities: [
-      { t: "会员资产经营", d: "从 0 搭建会员与私域体系，能对复购率、会员 GMV 占比负责。" },
-      { t: "数字化增长", d: "熟悉 RFM 分层、自动化规则、内容种草到交易转化的完整链路。" },
-      { t: "一级部门统管", d: "有 VP 级视野，能同时管理运营、产品、数据与内容团队。" }
-    ],
-    fit: {
-      must: "餐饮 / 零售高频场景 + 亿级会员或私域体系搭建经验；具一级部门负责人经历。",
-      plus: "跨品牌联合会员、出海会员体系、AI 个性化推荐等增量能力。",
-      risk: "纯平台流量补贴打法，未必适应餐饮低频高客单的服务场景。"
-    },
-    pools: [
-      {
-        tier: 1,
-        label: "A · 餐饮与零售优先池",
-        desc: "同赛道或会员模型最接近，落地风险最低。",
-        companies: [
-          { name: "瑞幸咖啡", why: "私域从 0 到千万级企微社群，社群发券日转化率约 30%；CGO 杨飞处于可接触状态。" },
-          { name: "星巴克中国", why: "1.6 亿星享俱乐部会员，数字创新为一级部门，跨品牌联合会员成熟。" },
-          { name: "麦当劳中国", why: "3 亿 + 注册会员、1.4 亿 App 月活，90% 订单来自数字化渠道。" },
-          { name: "霸王茶姬", why: "2.57 亿会员，活跃会员复购率 43%，AI 个性化推荐落地。" },
-          { name: "蜜雪冰城", why: "中国大区会员突破 5 亿，自有 App / 小程序精细化运营。" },
-          { name: "盒马", why: "4,000 万会员，RFM 精细化运营，高净值用户 ARPU 提升 40%。" },
-          { name: "山姆中国", why: "付费会员制标杆，300 万 + 付费会员，线上销售占比超 50%。" },
-          { name: "名创优品", why: "1.12 亿注册会员，会员 GMV 占比 59.5%，私域用户 2,000 万 +。" }
-        ]
-      },
-      {
-        tier: 2,
-        label: "B · 互联网能力池",
-        desc: "增长体系最成熟，但需评估实体场景适配。",
-        companies: [
-          { name: "美团", why: "8 亿年交易用户，会员体系覆盖外卖 / 酒旅 / 出行 / 医疗。" },
-          { name: "抖音生活服务", why: "内容种草 + 交易闭环，餐饮品类交易增长快。" },
-          { name: "小红书", why: "4 亿月活，柯南从 0 搭建社区运营、用户增长与商业化体系。" },
-          { name: "淘天集团", why: "88VIP 超 5,900 万，品牌会员运营基础设施完整。" },
-          { name: "京东", why: "PLUS 付费会员，订阅后年消费增 150%、频次增 120%。" },
-          { name: "拼多多", why: "百亿补贴与多人拼团，用户增长与供应链双轮。" }
-        ]
-      },
-      {
-        tier: 3,
-        label: "C · 快消补课池",
-        desc: "DTC 与私域仍在建设期，方法论可参考。",
-        companies: [
-          { name: "宝洁中国", why: "AI 融入消费者洞察与供应链决策，北京创新中心二期启用。" },
-          { name: "联合利华中国", why: "FTC 工厂直连消费者模式，社交优先内容营销。" },
-          { name: "元气森林", why: "一物一码全链路与「方舟」渠道数字化，付费会员制。" },
-          { name: "伊利", why: "YILI-Agent 智能体超 2,000 个，覆盖会员运营与物码营销。" },
-          { name: "蒙牛", why: "物码营销精准费用直达终端，数字化提效降本。" }
-        ]
-      }
-    ],
-    shortlist: [
-      { name: "杨飞", company: "前瑞幸咖啡", title: "联合创始人 / 原 CGO", note: "同赛道 + 亿级私域 + 当前处于职业空窗，是本次最现实的人选；需完成合规背景调查。", tier: 1, status: "优先接触", rating: 5, contact: 5 },
-      { name: "刘文娟", company: "星巴克中国", title: "COO", note: "数字创新出身，统管零售与数字两大单元；1.6 亿会员与联合会员经验，外企节奏需评估。", tier: 1, status: "第二优先", rating: 4, contact: 3 },
-      { name: "严筱磊", company: "盒马", title: "CEO", note: "零售数字化实战派，刚带领盒马全年盈利，时机不对；需给到集团级盘子才可能谈。", tier: 2, status: "长期关注", rating: 4, contact: 2 },
-      { name: "柯南（丁玲）", company: "小红书", title: "总裁", note: "2015 年加入，从 0 到 4 亿月活的核心操盘手；2026 年 4 月升任总裁且 IPO 在即，短期难挖。", tier: 2, status: "长期关注", rating: 3, contact: 1 },
-      { name: "刘鹏", company: "山姆中国", title: "业态总裁", note: "付费会员制专家，阿里 + 零售双背景；2025 年 10 月刚入职且正处舆情期。", tier: 2, status: "长期关注", rating: 3, contact: 1 }
-    ],
-    bench: [
-      { name: "会员运营负责人", company: "霸王茶姬 · 尹登峰团队", title: "2.57 亿会员操盘" },
-      { name: "数智化团队负责人", company: "蜜雪冰城 · 张红甫麾下", title: "5 亿会员体系" },
-      { name: "聂薇", company: "屈臣氏中国", title: "企微 3,400 万消费者互动平台" },
-      { name: "会员 / 私域负责人", company: "名创优品 · 叶国富麾下", title: "1.12 亿会员" }
-    ],
-    map: [
-      {
-        group: "餐饮",
-        companies: [
-          { name: "瑞幸咖啡", people: [{ name: "杨飞", title: "联合创始人 / CGO" }, { name: "郭谨一", title: "董事长兼 CEO" }] },
-          { name: "蜜雪冰城", people: [{ name: "张红甫", title: "联席董事长（数智化）" }, { name: "张渊", title: "CEO" }] },
-          { name: "西贝餐饮", people: [{ name: "董俊义", title: "主品牌 CEO" }, { name: "宋宣", title: "副总裁 · 战略与家庭场景" }] },
-          { name: "麦当劳中国", people: [{ name: "张家茵", title: "CEO" }] },
-          { name: "星巴克中国", people: [{ name: "刘文娟", title: "COO" }, { name: "杨振", title: "CGO" }] },
-          { name: "霸王茶姬", people: [{ name: "尹登峰", title: "全球 COO / 中国区 CEO" }] },
-          { name: "奈雪的茶", people: [{ name: "彭心", title: "创始人 / 总经理" }] }
-        ]
-      },
-      {
-        group: "互联网",
-        companies: [
-          { name: "美团", people: [{ name: "王莆中", title: "高级副总裁 · 核心本地商业" }, { name: "李树斌", title: "美团平台负责人" }] },
-          { name: "抖音生活服务", people: [{ name: "浦燕子", title: "商业化负责人兼生活服务负责人" }] },
-          { name: "小红书", people: [{ name: "柯南（丁玲）", title: "总裁" }] },
-          { name: "淘天集团", people: [{ name: "戴珊", title: "CEO" }] },
-          { name: "京东", people: [{ name: "许冉", title: "CEO" }] }
-        ]
-      },
-      {
-        group: "快消",
-        companies: [
-          { name: "宝洁中国", people: [{ name: "许敏", title: "大中华区董事长兼 CEO" }] },
-          { name: "联合利华中国", people: [{ name: "杨纪宝", title: "客户运营副总裁" }] },
-          { name: "元气森林", people: [{ name: "唐彬森", title: "创始人" }, { name: "黄晓枫", title: "CIO" }] }
-        ]
-      },
-      {
-        group: "零售",
-        companies: [
-          { name: "盒马", people: [{ name: "严筱磊", title: "CEO" }] },
-          { name: "山姆中国", people: [{ name: "刘鹏", title: "业态总裁" }] },
-          { name: "名创优品", people: [{ name: "叶国富", title: "创始人 / CEO" }] },
-          { name: "屈臣氏中国", people: [{ name: "聂薇", title: "O+O 负责人" }] }
-        ]
-      }
-    ],
-    keywords: ["用户增长负责人", "会员运营", "私域运营", "CGO / 首席增长官", "CDO", "亿级会员", "RFM", "联合会员"],
-    interview: [
-      "流量还是会员：请用一条真实增长曲线说明，增量来自补贴投放还是会员深度经营。",
-      "一级部门成色：直接汇报对象是谁、预算与编制多大、跨 BU 协同靠什么机制推动。",
-      "场景迁移：高客单、重服务的正餐场景里，如何设计复购与权益，而不是照搬平台补贴。",
-      "团队与结果：拆解会员规模、活跃率、复购率、会员 GMV 占比的基线与本人贡献。"
-    ],
-    risk: "五位一号位候选人均为 VP / CEO 级，薪酬与授权预期高；建议同步储备执行层作为入职后的核心班底。"
-  },
-
-  {
-    id: "brand",
-    no: "04",
-    name: "品牌部负责人",
-    alias: "兼 主品牌市场营销负责人",
-    dept: "品牌部 / 市场营销部",
-    owner: "蒋郭",
-    coOwner: "王祺中（主品牌市场营销负责人 · 2026-12-15）",
-    deadline: "2026-12-15",
-    source: {
-      label: "品牌营销负责人-人才mapping",
-      url: "https://haidilao.feishu.cn/wiki/MlJSwxOrgimQxgkuDKSchOLdn9g"
-    },
-    oneLiner: "品牌战略、整合营销、数字化增长、内容创新，四者兼备的 CMO。",
-    positioning: [
-      "海底捞年营收超 420 亿、日均客流超 110 万，正处于品牌升级与多品牌战略关键期；红石榴计划推进内部孵化，主品牌面临年轻化与场景营销创新。",
-      "理想人选需有餐饮 / 食品饮料 / 零售 / 新消费头部企业背景，10 年以上营销经验、5 年以上品牌一号位经验，并有万店级连锁操盘经历优先。"
-    ],
-    scope: ["品牌战略", "整合营销", "内容创新", "数字化增长", "多品牌 / 出海"],
-    capabilities: [
-      { t: "品牌升级", d: "主导过品牌焕新、赛道定义或高端化，能建立清晰的品牌资产框架。" },
-      { t: "整合营销", d: "全国性营销战役、爆款产品打造、代言人与 IP 联名的完整操盘。" },
-      { t: "增长与内容", d: "内容中台、种草与效果投放、私域联动，能把声量转成生意。" },
-      { t: "组织适配", d: "适应强执行力、结果导向文化，有下沉市场或加盟体系经验优先。" }
-    ],
-    fit: {
-      must: "头部企业品牌一号位经历，能同时讲清品牌战略与增长结果。",
-      plus: "餐饮 + 食品双栖、出海品牌建设、特许经营体系营销经验。",
-      risk: "纯平台方或纯美妆背景，缺少餐饮门店端理解；高端潮牌路线与大众餐饮定位存在偏差。"
-    },
-    pools: [
-      {
-        tier: 1,
-        label: "A · 餐饮 / 茶饮",
-        desc: "同赛道、万店级品牌操盘，迁移成本最低。",
-        companies: [
-          { name: "瑞幸咖啡", why: "万店级营销操盘，流量池方法论与爆品联名能力顶尖；体系内地位稳固，挖动难度极高。" },
-          { name: "星巴克中国", why: "内容中台与数字化营销转型，快消 + 互联网 + 咖啡三重背景。" },
-          { name: "霸王茶姬", why: "麦当劳体系 15 年，管理 80 个特许经营市场，匹配出海与加盟战略。" },
-          { name: "古茗", why: "品牌原生派，深刻理解下沉市场年轻人，万店规模品牌建设。" },
-          { name: "喜茶", why: "品牌高端化与空间体验营销强，偏潮牌路线需评估调性。" },
-          { name: "麦当劳中国", why: "本土化营销与代言人体系成熟；核心人选刚流动至京东。" }
-        ]
-      },
-      {
-        tier: 2,
-        label: "B · 食品饮料",
-        desc: "大品牌基建与渠道营销能力强，餐饮场景需补课。",
-        companies: [
-          { name: "元气森林", why: "从 0 到百亿的全周期营销，128 万 + 合作网点，渠道数字化程度高。" },
-          { name: "蒙牛集团", why: "千亿级快消 CMO，奥运与体育营销体系化，数字化玩法偏保守。" },
-          { name: "佳沛（Zespri）", why: "全球品牌战略与品牌焕新，长期主义建设；品类相对小众。" },
-          { name: "百威英博", why: "酒饮场景营销与年轻化资源丰富，可作为跨品类补充。" }
-        ]
-      },
-      {
-        tier: 3,
-        label: "C · 零售 / 新消费",
-        desc: "品牌升级与 IP 运营见长，餐饮适配性需验证。",
-        companies: [
-          { name: "珀莱雅", why: "三次品牌升级与赛道跃迁，跨品类方法可迁移；2025 年 8 月刚上任。" },
-          { name: "泡泡玛特", why: "IP 全球化运营标杆，海外营收高增；餐饮品类经验为零。" },
-          { name: "名创优品", why: "万店零售品牌升级与超级 IP 联名体系；定位偏大众低价。" },
-          { name: "小红书", why: "种草经济与内容营销天花板，品牌方操盘经验相对少。" },
-          { name: "宝洁 / 沃尔玛", why: "品牌管理与全球零售营销体系完整，可作为方法论参照。" }
-        ]
-      }
-    ],
-    shortlist: [
-      { name: "杨振", company: "星巴克中国", title: "CGO", note: "内容中台首倡者，宝洁 + 百事 + 阿里文娱 + 星巴克复合履历；2024 年底上任，任期较短。", tier: 1, status: "高匹配 · 难挖", score: 8.5 },
-      { name: "果小", company: "珀莱雅", title: "CMO", note: "泡泡玛特 → 蕉下 → 珀莱雅，三次品牌升级成功；2025 年 8 月刚上任，建议先建联。", tier: 1, status: "第一推荐", score: 8.4 },
-      { name: "杨飞", company: "瑞幸咖啡", title: "CGO", note: "万店级营销操盘手，《流量池》作者；体系内地位稳固，挖动难度极高。", tier: 1, status: "极高难度", score: 8.4 },
-      { name: "Eugene Lee", company: "霸王茶姬", title: "亚太区 VP 兼 CMO", note: "麦当劳 15 年，管理 80 个特许经营市场；新加坡办公，地点需协调。", tier: 1, status: "立即启动", score: 8.3 },
-      { name: "陈晓芸", company: "泡泡玛特", title: "国际集团副总裁", note: "IP 全球化与文化出海能力极强，餐饮经验为零，出海战略明确时再重点接触。", tier: 2, status: "战略储备", score: 8.3 },
-      { name: "顿贤", company: "古茗", title: "CMO", note: "茶饮原生派，IP 联名与下沉市场洞察深；公开信息少，需背调。", tier: 1, status: "等待窗口", score: 8.1 },
-      { name: "范军", company: "元气森林", title: "营销负责人", note: "全渠道营销与渠道数字化，128 万 + 网点；饮料品类，餐饮运营经验较少。", tier: 2, status: "可接触", score: 7.9 },
-      { name: "王晓东", company: "喜茶", title: "品牌副总裁", note: "奢侈品 / 潮牌跨界与空间体验强；高端路线与大众餐饮有差距。", tier: 2, status: "观察", score: 7.8 },
-      { name: "刘晓彬", company: "名创优品", title: "CMO", note: "万店零售品牌升级与 IP 联名；品牌调性偏大众低价。", tier: 3, status: "备选", score: 7.8 },
-      { name: "须聪", company: "京东（前麦当劳中国）", title: "高管", note: "麦当劳中国本土化营销与代言人体系；刚加入京东，短期难动。", tier: 3, status: "观察", score: 7.8 },
-      { name: "赵兴继", company: "蒙牛集团", title: "CMO", note: "千亿级品牌基建与体育营销资源，数字化玩法偏保守。", tier: 3, status: "备选", score: 7.7 },
-      { name: "黄国慧", company: "佳沛", title: "CMO", note: "全球品牌战略与焕新，20 年品牌经验；水果品类较窄。", tier: 3, status: "备选", score: 7.6 },
-      { name: "之恒", company: "小红书", title: "CMO", note: "种草经济与用户洞察顶级，平台方背景缺品牌方操盘。", tier: 3, status: "备选", score: 7.5 }
-    ],
-    tables: [
-      {
-        title: "综合评分矩阵（满分 10）",
-        columns: ["人选", "现任", "品牌战略", "数字增长", "连锁运营", "内容创新", "全球化", "文化适配", "综合"],
-        rows: [
-          ["杨振", "星巴克", "9.0", "9.0", "8.5", "9.5", "8.0", "7.0", "8.5"],
-          ["果小", "珀莱雅", "9.5", "8.5", "7.0", "9.5", "8.5", "7.5", "8.4"],
-          ["杨飞", "瑞幸", "8.5", "10.0", "9.5", "8.0", "6.5", "8.0", "8.4"],
-          ["Eugene Lee", "霸王茶姬", "9.0", "7.5", "9.5", "7.5", "9.5", "6.5", "8.3"],
-          ["陈晓芸", "泡泡玛特", "9.0", "8.0", "8.5", "8.5", "9.5", "6.5", "8.3"],
-          ["顿贤", "古茗", "8.0", "8.0", "9.0", "9.5", "6.0", "8.0", "8.1"]
-        ]
-      }
-    ],
-    map: [
-      {
-        group: "餐饮 / 茶饮",
-        companies: [
-          { name: "瑞幸咖啡", people: [{ name: "黎辉", title: "董事长" }, { name: "郭谨一", title: "CEO" }, { name: "杨飞", title: "CGO" }, { name: "李瑞斯", title: "市场 VP" }] },
-          { name: "星巴克中国", people: [{ name: "王静瑛", title: "CEO" }, { name: "杨振", title: "CGO" }, { name: "刘文娟", title: "联席 CEO" }, { name: "薛鹏", title: "品牌总监" }] },
-          { name: "麦当劳", people: [{ name: "张家茵", title: "CEO" }, { name: "何亚彬", title: "CGO" }, { name: "林慧蓉", title: "COO" }, { name: "文迪", title: "数字化营销及电商 VP" }] },
-          { name: "霸王茶姬", people: [{ name: "尹登峰", title: "全球 COO / 中国区 CEO" }, { name: "Eugene Lee", title: "亚太区 VP 兼 CMO" }, { name: "徐驰", title: "总经理" }] },
-          { name: "喜茶", people: [{ name: "王晓东", title: "品牌副总裁" }, { name: "姚璐", title: "品牌总经理" }] },
-          { name: "古茗", people: [{ name: "顿贤", title: "CMO" }] },
-          { name: "百胜中国", people: [{ name: "陈琦", title: "企划部总经理" }, { name: "于惠新", title: "CMO" }] },
-          { name: "奈雪的茶", people: [{ name: "黄之曦", title: "CMO" }] }
-        ]
-      },
-      {
-        group: "食品饮料",
-        companies: [
-          { name: "元气森林", people: [{ name: "范军", title: "营销负责人" }] },
-          { name: "蒙牛集团", people: [{ name: "赵兴继", title: "CMO" }] },
-          { name: "佳沛", people: [{ name: "黄国慧", title: "CMO" }] },
-          { name: "百威英博", people: [{ name: "汤卓", title: "资深市场总监" }, { name: "Colin Zhang", title: "数据与数字营销高级总监" }] },
-          { name: "伊利集团", people: [{ name: "武超", title: "数字营销与品牌公关负责人" }] }
-        ]
-      },
-      {
-        group: "零售 / 新消费",
-        companies: [
-          { name: "珀莱雅", people: [{ name: "果小", title: "CMO" }, { name: "叶伟", title: "CMO / VP" }] },
-          { name: "泡泡玛特", people: [{ name: "陈晓芸", title: "国际集团副总裁" }] },
-          { name: "名创优品", people: [{ name: "刘晓彬", title: "CMO" }] },
-          { name: "小红书", people: [{ name: "之恒", title: "CMO" }] },
-          { name: "沃尔玛", people: [{ name: "朱晓静", title: "中国总裁兼 CEO" }, { name: "张青", title: "CMO" }, { name: "刘鹏", title: "山姆业态总裁" }] },
-          { name: "宝洁", people: [{ name: "梁朝辉", title: "CMO" }, { name: "Benjamin", title: "营销副总裁" }] }
-        ]
-      }
-    ],
-    keywords: ["品牌营销负责人", "CMO", "品牌升级", "整合营销", "内容中台", "IP 联名", "出海品牌", "特许经营营销"],
-    interview: [
-      "品牌 vs 增长：请用一次战役说明声量指标与生意结果之间的关系，预算如何分配。",
-      "万店体系：如何在总部标准与区域 / 加盟执行之间保持品牌一致性。",
-      "多品牌协同：主品牌与子品牌如何共用资源又不互相稀释。",
-      "内容组织：是否搭过内容中台，如何把内容生产变成可复用的能力。",
-      "文化适配：强执行、结果导向的组织里，如何推动跨部门战役落地。"
-    ],
-    risk: "餐饮 CMO 人才供给有限且多为内部培养；快消与新消费背景需评估门店端理解，薪酬体系与传统快消存在差距。"
-  },
-];
-  </script>
-  <script>window.MAPPING_ROLES = window.MAPPING_ROLES || [];
-window.MAPPING_ROLES.push(
-{
-    id: "menu",
-    no: "05",
-    name: "菜单规划负责人",
-    dept: "菜单规划部",
-    owner: "王祺中",
-    deadline: "2026-11-30",
-    source: {
-      label: "商超行业品类 / 商品规划负责人人才 Mapping",
-      url: "https://haidilao.feishu.cn/docx/U9dwdVpBKoXzJ7xmy4RcaQflnN6"
-    },
-    oneLiner: "把商超的商品规划能力，翻译成一张能打的菜单。",
-    positioning: [
-      "目标岗位为菜单管理负责人，负责产品企划及菜单策略管理；目标人群锁定商超公司品类规划、商品规划与商品部负责人。",
-      "核心是以商品力驱动菜单结构，从消费者洞察、品类规划到商品开发与供应链整合形成闭环。"
-    ],
-    scope: ["品类规划", "商品开发", "菜单策略", "自有品牌", "供应链整合"],
-    capabilities: [
-      { t: "品类规划", d: "基于消费趋势与数据做品类结构设计，能定义「卖什么、卖多少、怎么组合」。" },
-      { t: "商品开发", d: "从洞察到概念、打样、上市与生命周期管理的完整商品管线。" },
-      { t: "自有品牌", d: "有定制商品或自有品牌开发经验，能建立差异化商品矩阵。" },
-      { t: "供应链整合", d: "懂采购、品控与成本结构，能与供应链共同把商品落地。" }
-    ],
-    fit: {
-      must: "品类规划、商品开发、供应链整合与数据驱动决策四项能力齐备。",
-      plus: "生鲜 / 食品品类经验、自有品牌开发、会员制零售用户洞察、爆品打造案例。",
-      risk: "纯采购或纯运营背景、只做单一品类、缺少商品定义能力的人选不匹配。"
-    },
-    pools: [
-      {
-        tier: 1,
-        label: "第一梯队 · 会员店 / 新零售一号位",
-        desc: "商品力最强，直接对标菜单结构设计。",
-        companies: [
-          { name: "永辉超市", why: "佘咸平集山姆、盒马、大润发 M 会员店三重背景，主导商品中心化战略。" },
-          { name: "盒马", why: "严筱磊以财务 + 商品双视角推动扭亏，构建数据—供应链—体验的商品力体系。" },
-          { name: "叮咚买菜", why: "徐志坚搭建叮咚 V5 自有品牌，200 余支 SKU、渗透率 68.5%。" }
-        ]
-      },
-      {
-        tier: 2,
-        label: "第二梯队 · 各业态商品负责人",
-        desc: "大卖场、会员店、即时零售的商品操盘手。",
-        companies: [
-          { name: "大润发", why: "黄林统管快消、纺织、百货、家电，主导全国联采体系整合。" },
-          { name: "麦德龙中国", why: "余俊贤负责自有品牌「宜客」与进口商品，2,300+ SKU、渗透率 70%。" },
-          { name: "叮咚买菜", why: "申强提出「再造一个叮咚」，自有品牌战略与五力模型评估体系。" }
-        ]
-      },
-      {
-        tier: 3,
-        label: "第三梯队 · 区域 / 品类负责人",
-        desc: "实操层，可作为副手或品类负责人储备。",
-        companies: [
-          { name: "叮咚买菜", why: "戴正为 V5 商品开发实际操盘手，品控严格；夏向东深耕蔬菜豆制品与产地直采。" },
-          { name: "大润发", why: "季景丹为大生鲜部门负责人，体系内成长，生鲜全链路经验丰富。" }
-        ]
-      }
-    ],
-    shortlist: [
-      { name: "佘咸平", company: "永辉超市", title: "副总裁兼首席产品官", note: "山姆 → 盒马 → 大润发 M 会员店三重背景，最匹配；2025 年 6 月到岗，正处改革关键期。", tier: 1, status: "最匹配 · 高难度", rating: 5 },
-      { name: "严筱磊", company: "盒马", title: "CEO 兼 CMO", note: "财务 + 商品双视角，推动盒马扭亏；级别过高，挖角成本极高。", tier: 1, status: "不建议重点挖", rating: 5 },
-      { name: "徐志坚", company: "叮咚买菜", title: "首席商品官", note: "正大集团 24 年，全品类商品管理与 V5 自有品牌体系；挖角难度中高。", tier: 1, status: "可接触", rating: 4 },
-      { name: "黄林", company: "大润发", title: "全国商品部大标品总经理", note: "原永辉副总裁，统管多个核心品类，全国联采整合能力强；刚到大润发。", tier: 2, status: "可接触", rating: 4 },
-      { name: "余俊贤", company: "麦德龙中国", title: "商品开发部总经理", note: "自有品牌与进口商品资源强，擅长爆品孵化；挖角难度中等。", tier: 2, status: "可接触", rating: 4 },
-      { name: "申强", company: "叮咚买菜", title: "副总裁兼研究院院长", note: "自有品牌战略规划与商品全周期评估体系，战略视野好。", tier: 2, status: "可接触", rating: 4 },
-      { name: "戴正", company: "叮咚买菜", title: "标品商品开发负责人", note: "V5 实际操盘手，品控严格，熟悉需求到落地全链路。", tier: 3, status: "储备", rating: 3 },
-      { name: "季景丹", company: "大润发", title: "大生鲜部门负责人", note: "体系内成长，生鲜品类与卖场运营全链路经验。", tier: 3, status: "储备", rating: 3 },
-      { name: "夏向东", company: "叮咚买菜", title: "蔬菜豆制品高级商品开发总监", note: "豆制品自有品牌操盘人，产地直采到加工全产业链，累计销售 15 亿。", tier: 3, status: "储备", rating: 3 }
-    ],
-    map: [
-      {
-        group: "仓储会员店",
-        companies: [
-          { name: "山姆会员商店", people: [{ name: "Sean Jackson", title: "首席采购官（2026.09）" }, { name: "张青（前）", title: "前首席采购官 · 现博裕运营合伙人" }] },
-          { name: "Costco 开市客", people: [{ name: "Richard Chang", title: "SVP & GM Asia" }] },
-          { name: "麦德龙中国", people: [{ name: "余俊贤", title: "商品开发部总经理" }] }
-        ]
-      },
-      {
-        group: "大卖场 / 综合超市",
-        companies: [
-          { name: "沃尔玛大卖场", people: [{ name: "Amber Bynum", title: "首席采购官（2026.10）" }] },
-          { name: "永辉超市", people: [{ name: "佘咸平", title: "副总裁兼首席产品官" }] },
-          { name: "大润发", people: [{ name: "黄林", title: "大标品总经理" }, { name: "季景丹", title: "大生鲜负责人" }] },
-          { name: "华润万家", people: [{ name: "徐健", title: "董事长（曾任首席采购官）" }] },
-          { name: "胖东来", people: [{ name: "卜景超", title: "超市总经理" }] }
-        ]
-      },
-      {
-        group: "新零售 / 即时零售",
-        companies: [
-          { name: "盒马", people: [{ name: "严筱磊", title: "CEO 兼 CMO" }] },
-          { name: "叮咚买菜", people: [{ name: "徐志坚", title: "首席商品官" }, { name: "申强", title: "副总裁兼研究院院长" }, { name: "戴正", title: "标品商品开发负责人" }, { name: "夏向东", title: "蔬菜豆制品高级总监" }] },
-          { name: "朴朴超市", people: [{ name: "待补", title: "商品运营总监" }] }
-        ]
-      },
-      {
-        group: "便利店 / 折扣 / 电商",
-        companies: [
-          { name: "罗森中国", people: [{ name: "吉田凉平", title: "事业推进总部总经理" }] },
-          { name: "奥乐齐 ALDI", people: [{ name: "待补", title: "自有品牌占比 80%+" }] },
-          { name: "京东超市", people: [{ name: "牛英华", title: "大商超事业群总裁" }] }
-        ]
-      }
-    ],
-    keywords: ["品类规划负责人", "商品规划总监", "首席商品官", "自有品牌", "会员店采购", "商品开发", "爆品孵化", "供应链整合"],
-    interview: [
-      "定义商品还是执行采购：请举一个从洞察到上市的完整案例，说明本人决定哪一步。",
-      "组合结构：如何决定品类宽度、价格带与毛利结构，用什么指标复盘。",
-      "自有品牌：从 0 到规模化走过哪几步，品控与供应商如何共创。",
-      "餐饮迁移：商超的包装商品逻辑，如何转成门店现制菜单与出品效率。"
-    ],
-    risk: "商超商品负责人习惯长周期、大包装与货架逻辑，需重点验证对餐饮出品、门店效率与菜单迭代节奏的理解。"
-  },
-{
-    id: "supply",
-    no: "07",
-    name: "供应链负责人",
-    dept: "供应链管理部",
-    owner: "张善彤",
-    deadline: "2026-12-15",
-    source: {
-      label: "供应链负责人_人才mapping",
-      url: "https://haidilao.feishu.cn/wiki/VqR2wHSuUiq9vYkvwAzcfKwLnQg"
-    },
-    oneLiner: "端到端 E2E：前端业务可见，后端供应链可控。",
-    positioning: [
-      "打通上游供给、中央仓到门店 / 前置仓的全链路，统一链路指标，让计划、库存、仓储与履约协同。",
-      "同时负责中央补货系统与库存策略、仓储 PCS 体积与硬件产品化、全链路损耗治理，并对库存周转与售罄率负责。"
-    ],
-    scope: ["E2E 供应链", "库存与补货", "S&OP", "仓容 PCS", "损耗治理"],
-    capabilities: [
-      { t: "端到端设计", d: "有全国多仓 + 多门店的顶层设计经验，能统一指标并推动业务—供应链—IT 三方对齐。" },
-      { t: "补货与库存", d: "主导过中央补货系统建设或重构，懂需求预测、安全库存与仓网调拨。" },
-      { t: "仓储硬件", d: "掌握 PCS 仓容体积测算、库位规划与仓储硬件选型落地。" },
-      { t: "损耗治理", d: "建立识别、核算、处置闭环，有可复盘的损耗率改善结果。" }
-    ],
-    fit: {
-      must: "8–12 年零售 / 生鲜 / 连锁餐饮端到端供应链全盘经验，3 年以上团队管理，操盘过全国多仓 + 多门店规模。",
-      plus: "中央补货系统 0–1 搭建、全链路损耗治理项目、仓网 PCS 规划与硬件产品落地、数据指标体系搭建。",
-      risk: "只做库存计划缺系统落地，或只做仓储运营缺顶层设计，均不满足综合要求。"
-    },
-    pools: [
-      {
-        tier: 1,
-        label: "第一梯队 · 业态与能力高度对标",
-        desc: "即时零售 / 新零售生鲜标杆，E2E 体系完整。",
-        companies: [
-          { name: "盒马", why: "商—仓—店一体化，中央补货、S&OP、PCS 仓容与全链路损耗治理实战完整，对标度最高。" },
-          { name: "美团小象", why: "前置仓 + 中心仓仓网，S&OP、中央补货与库存调拨机制成熟，人才池匹配度高。" }
-        ]
-      },
-      {
-        tier: 2,
-        label: "第二梯队 · 体系成熟对标",
-        desc: "仓网规模大，标准化能力强，能力可迁移。",
-        companies: [
-          { name: "京东生鲜", why: "全国中心仓—区域仓—前置仓多层仓网，S&OP 与仓储硬件标准化成熟。" },
-          { name: "沃尔玛", why: "集中式中央补货系统，库存健康与损耗管控严苛，流程标准化程度高。" }
-        ]
-      },
-      {
-        tier: 3,
-        label: "第三梯队 · 能力可迁移备选",
-        desc: "生鲜零售实战扎实，部分为区域龙头。",
-        companies: [
-          { name: "叮咚买菜", why: "自研中央补货系统，动态安全库存与损耗治理，场景高度贴近。" },
-          { name: "朴朴超市", why: "大仓 + 站点模式，端到端闭环，库存周转与损耗指标行业领先。" }
-        ]
-      }
-    ],
-    shortlist: [
-      { name: "郝京彬", company: "盒马", title: "物流供应链投资总监", note: "阿里 P9，仓网物流一号位，总部带 12 人、全国各区上百人；菜鸟初创成员之一。", tier: 1, status: "可接触" },
-      { name: "汪浩", company: "美团小象", title: "供应链一号位", note: "不考虑外部机会，直接向小象一号位汇报，近 1–2 年不看机会。", tier: 1, status: "暂不接触" },
-      { name: "刘 min（闻先）", company: "盒马", title: "供应链一号位", note: "完全不看机会，2016 年起负责该岗位，无前任。", tier: 1, status: "暂不接触" },
-      { name: "何素文", company: "京东七鲜", title: "供应链一号位", note: "老板亲信，不看机会。", tier: 2, status: "暂不接触" },
-      { name: "张 wen", company: "美团小象（前任）", title: "前任供应链一号位", note: "现在快乐猴，不看餐饮行业，方向为智能硬件与出海。", tier: 3, status: "已排除" },
-      { name: "邱涛", company: "沃尔玛", title: "供应链负责人（现任）", note: "名单已锁定，职责与汇报线待补全。", tier: 3, status: "待接触" }
-    ],
-    map: [
-      {
-        group: "即时零售",
-        companies: [
-          { name: "美团 · 小象", people: [{ name: "汪浩", title: "现任供应链一号位" }, { name: "张 wen", title: "前任一号位 · 现在快乐猴" }] },
-          { name: "盒马", people: [{ name: "刘 min（闻先）", title: "供应链一号位" }, { name: "郝京彬", title: "物流供应链投资总监 P9" }] },
-          { name: "京东 · 七鲜", people: [{ name: "何素文", title: "供应链一号位" }] },
-          { name: "叮咚买菜", people: [{ name: "待补", title: "供应链负责人 / 中央补货总监" }] },
-          { name: "朴朴超市", people: [{ name: "待补", title: "供应链总监 / 库存计划负责人" }] }
-        ]
-      },
-      {
-        group: "大型零售",
-        companies: [
-          { name: "沃尔玛", people: [{ name: "邱涛", title: "现任" }, { name: "曾巧佳", title: "前任" }] }
-        ]
-      }
-    ],
-    keywords: ["端到端 E2E 供应链负责人", "供应链计划总监", "中央补货", "S&OP", "库存计划", "PCS 仓容", "损耗治理", "仓网规划"],
-    interview: [
-      "计划策略型 vs 仓储运营型：是否真正主导过中央补货系统产品化落地，而不只是使用系统。",
-      "端到端完整操盘 vs 单一模块：看全链路指标结果，而非单点职能经验。",
-      "系统建设：区分业务策略输出与纯 IT 开发，追问需求设计、策略落地与版本迭代。",
-      "损耗与 PCS：追问真实项目与可复盘业务结果，拒绝只有概念认知。"
-    ],
-    risk: "第一梯队一号位多数明确不看机会，实际可谈窗口集中在二把手与仓储 / 计划模块负责人，需调整寻访层级。"
-  },
-{
-    id: "sushi",
-    no: "08",
-    name: "寿司业务负责人",
-    dept: "寿司",
-    owner: "林莉",
-    deadline: "2026-10-23",
-    source: {
-      label: "寿司营运负责人_人才mapping",
-      url: "https://haidilao.feishu.cn/docx/CLhidF9BOofldIxqB3qc6R54nJh"
-    },
-    oneLiner: "不是后厨主厨，而是能把寿司品牌从 0 开到几十家的业务总经理。",
-    positioning: [
-      "0-1 搭建寿司品牌：供应链、门店标准化、拓店扩张、产品研发、成本管控与门店运营全链路负责，适配集团化体系。",
-      "以大众连锁为主，同时可储备高端板前产品线能力；核心是复制与拓店，而非单店手艺。"
-    ],
-    scope: ["品牌 0-1", "门店标准化", "拓店扩张", "产品研发", "成本管控"],
-    capabilities: [
-      { t: "0-1 落地", d: "有餐饮新品牌从 0 到 1 经验，成功落地 10 家以上直营门店。" },
-      { t: "供应链与损耗", d: "懂餐饮供应链、食材损耗管控、中央厨房与预制产品标准化。" },
-      { t: "复制能力", d: "能搭门店 SOP、选址模型与商场拓店节奏，把单店模型复制出去。" }
-    ],
-    fit: {
-      must: "餐饮新品牌 0-1 落地并开出 10 家以上直营门店；懂供应链与食材损耗管控。",
-      plus: "寿司 / 日料品类经验、数字化、门店 SOP 搭建、商场拓店与选址模型。",
-      risk: "纯高端 Omakase 主厨（无规模化连锁经验、成本意识弱）；纯加盟品牌负责人（直营管理不足）。"
-    },
-    pools: [
-      {
-        tier: 1,
-        label: "A 组 · 连锁寿司",
-        desc: "强拓店、标准化、供应链与规模化复制。",
-        companies: [
-          { name: "滨寿司 Hama Sushi", why: "泉膳控股旗下，中国区扩张快，日籍高管与本土区域负责人并存。" },
-          { name: "寿司郎 SUSHIRO", why: "日本头部回转寿司，中国区组织完整，华东 / 华北 / 华南均有区域负责人。" },
-          { name: "争鲜 / 禾绿 / 小乔", why: "本土回转寿司品牌，创始人与运营团队直接可对话。" },
-          { name: "元气寿司", why: "中国区体系成熟，总经理与董事长层级清晰。" },
-          { name: "N 多寿司 / 鲜目录 / 河风", why: "本土规模化品牌，创始人与日常运营负责人可接触。" }
-        ]
-      },
-      {
-        tier: 2,
-        label: "B 组 · 高端板前 / Omakase",
-        desc: "产品与食材能力强，适合研发线而非一号位。",
-        companies: [
-          { name: "久兵卫 / 佐々 / 鮨昇", why: "料理长与创始人手艺顶尖，可作为产品研发负责人储备。" },
-          { name: "松笠 / 鮨然 / 鮨龍", why: "创始人兼主厨，品牌质感强，规模化与成本经验有限。" },
-          { name: "江户前寿司", why: "创始人具备多店经营，兼顾手艺与经营。" }
-        ]
-      },
-      {
-        tier: 3,
-        label: "C 组 · 综合日料集团",
-        desc: "寿司为核心品类，懂集团化运营与多品牌孵化。",
-        companies: [
-          { name: "四叶寿司", why: "创始人 + 料理总监 + 料理长三层结构，体系完整。" },
-          { name: "万岛日本料理", why: "创始人 / CEO 与区域负责人齐全，多店运营经验。" },
-          { name: "花潮 / 上井 / 赤坂亭", why: "连锁日料集团，营运与创始人层可接触。" },
-          { name: "将太无二 / 一绪 / 隐泉", why: "跨品类日式餐饮集团，可作为业务负责人备选。" }
-        ]
-      }
-    ],
-    shortlist: [
-      { name: "開健介（HIRAKI KENSUKE）", company: "滨寿司 / 泉膳控股", title: "中国区总经理", note: "日资连锁体系中国区一号位，拓店与标准化经验完整；需评估本土化与民企适配。", tier: 1, status: "重点接触" },
-      { name: "文颖妍", company: "滨寿司", title: "董事长 / 总经理（西南区域）", note: "本土高管负责区域经营，兼顾品牌与拓店，区域复制经验可直接对标。", tier: 1, status: "重点接触" },
-      { name: "木下嘉人", company: "寿司郎", title: "法定代表人 / 总经理 / 董事", note: "中国区法人层级，体系与供应链成熟；日籍高管流动意愿需确认。", tier: 1, status: "需验证" },
-      { name: "梁贵基", company: "元气寿司", title: "中国区总经理", note: "中国区操盘手，连锁寿司标准化与门店运营经验完整。", tier: 1, status: "重点接触" },
-      { name: "陈津秋（Stanley Chen）", company: "争鲜回转寿司", title: "创始人", note: "本土回转寿司规模化代表，供应链与门店模型成熟；创始人层级挖动难度高。", tier: 1, status: "高难度" },
-      { name: "樊劲松", company: "四叶寿司", title: "创始人 / 董事长", note: "综合日料集团，多品牌与高端线并存，可作为业务负责人或顾问。", tier: 3, status: "可接触" },
-      { name: "黄海辉", company: "万岛日本料理", title: "创始人 / CEO", note: "多店连锁日料，区域负责人体系完整，具备集团化运营视角。", tier: 3, status: "可接触" }
-    ],
-    map: [
-      {
-        group: "连锁寿司",
-        companies: [
-          { name: "滨寿司", people: [{ name: "開健介", title: "泉膳中国区总经理" }, { name: "文颖妍", title: "董事长 / 总经理（西南）" }, { name: "小川洋平", title: "社长" }] },
-          { name: "寿司郎", people: [{ name: "木下嘉人", title: "法定代表人 / 总经理" }, { name: "松田一成", title: "华北、华南区域经营管理" }, { name: "加藤広慎", title: "中国区负责人 / 董事长" }] },
-          { name: "争鲜", people: [{ name: "陈津秋", title: "创始人" }] },
-          { name: "禾绿", people: [{ name: "吴林", title: "创始人 / 总经理" }] },
-          { name: "小乔", people: [{ name: "张子群", title: "法定代表人 / 执行董事" }] },
-          { name: "河风精致寿司", people: [{ name: "刘彦英", title: "日常运营负责人" }, { name: "林雨静", title: "创始人" }] },
-          { name: "鲜目录", people: [{ name: "关星", title: "日常经营负责人" }, { name: "彭龙", title: "创始人" }] },
-          { name: "黑眼熊", people: [{ name: "张城鑫", title: "创始人" }] },
-          { name: "金匠寿司", people: [{ name: "金美华", title: "法定代表人 / 实控人" }, { name: "陈子翔", title: "董事 / 经理" }] },
-          { name: "元气寿司", people: [{ name: "梁贵基", title: "中国区总经理" }, { name: "伍伟国", title: "董事长" }] },
-          { name: "合点寿司", people: [{ name: "大島敏彦", title: "中国区董事长" }, { name: "川上翔吾", title: "中国区总经理" }] },
-          { name: "町上 / 苍井 / 万岁", people: [{ name: "郭嘉鑫", title: "町上创始人" }, { name: "何荣万", title: "万岁创始人" }] },
-          { name: "N 多寿司", people: [{ name: "董玉友", title: "创始人 / 董事长" }, { name: "牛玉雷", title: "联合创始人 / 总经理" }, { name: "阮秋晨", title: "品牌中心负责人" }] }
-        ]
-      },
-      {
-        group: "高端板前 / Omakase",
-        companies: [
-          { name: "久兵卫 / 佐々 / 鮨昇", people: [{ name: "张智祥", title: "久兵卫料理长" }, { name: "佐佐悠树", title: "佐々创始人" }, { name: "候书伟", title: "佐々料理长" }] },
-          { name: "松笠 / 鮨然 / 鮨龍", people: [{ name: "杜亚强", title: "松笠创始人兼主厨" }, { name: "鄂然", title: "鮨然创始人 / 主厨" }, { name: "黎文龙", title: "鮨龍主厨" }] },
-          { name: "山葵家 / 江户前", people: [{ name: "章小赞", title: "山葵家总经理" }, { name: "姜炳升", title: "江户前创始人 / 董事长" }] }
-        ]
-      },
-      {
-        group: "综合日料集团",
-        companies: [
-          { name: "四叶寿司", people: [{ name: "樊劲松", title: "创始人 / 董事长" }, { name: "宮田克哉", title: "料理总监" }] },
-          { name: "万岛", people: [{ name: "黄海辉", title: "创始人 / CEO" }, { name: "徐圣华", title: "执行董事 / 总经理" }, { name: "徐军", title: "杭州区域负责人" }] },
-          { name: "花潮", people: [{ name: "李总", title: "创始人（全名待核实）" }, { name: "黄", title: "营运总 · 40+ 店" }] },
-          { name: "赤坂亭 / 上井 / 大渔", people: [{ name: "游忠旺", title: "赤坂亭创始人" }, { name: "王荣富", title: "上井创始人" }, { name: "刘照森", title: "大渔创始人" }] },
-          { name: "将太无二 / 一绪 / 隐泉", people: [{ name: "邢力", title: "将太无二创始人" }, { name: "伍文力", title: "一绪总经理" }, { name: "Alan Wong", title: "隐泉创始人" }] }
-        ]
-      }
-    ],
-    keywords: ["寿司业务总经理", "寿司品牌负责人", "回转寿司运营总监", "日料供应链负责人", "0-1 拓店", "直营连锁扩张", "日料产品总监"],
-    interview: [
-      "单店打磨还是多店复制：本岗核心是后者，追问新店从签约到盈利的标准周期。",
-      "供应链：食材采购与损耗如何管控，中央厨房与预制比例如何设定。",
-      "成本结构：在客单与食材成本约束下，如何设计菜单与出品效率。",
-      "组织：总部与门店的权责如何划分，督导与培训体系怎么搭。"
-    ],
-    risk: "日籍高管文化适配与决策授权需提前确认；高端板前主厨只适合产品研发线，不应进入一号位流程。"
-  },
-{
-    id: "retail",
-    no: "09",
-    name: "零售负责人",
-    dept: "零售",
-    owner: "王祺中",
-    deadline: "2026-11-20",
-    source: {
-      label: "零售业务负责人_人才mapping",
-      url: "https://haidilao.feishu.cn/docx/G3S1dGfEpo1K7yx60RFcHvOhn4d"
-    },
-    oneLiner: "不是中国区总裁，而是能亲自管产品管线、打 KA、背 P&L 的品类大将。",
-    positioning: [
-      "海底捞 2025 年营收 432.25 亿元、外卖收入 26.58 亿元（同比 +111.9%）；2026 年在北京门店上线「严选小铺」，把自有零售 SKU 推向门店货架。",
-      "岗位面向集团本体零售 / 自有品牌业务，与颐海国际平行；需要能把「餐饮 + 标品零售」从战略讨论推进到落地的一号位。"
-    ],
-    scope: ["品类 P&L", "产品管线", "全渠道 KA", "自有品牌", "团队搭建"],
-    capabilities: [
-      { t: "品类 P&L", d: "亲自背过亿级以上生意，管过产品—品牌—渠道—供应链闭环。" },
-      { t: "品牌 + 销售双线", d: "既做过品牌 / 市场，也管过销售、Trade Marketing 与 KA。" },
-      { t: "产品定义", d: "从消费者洞察到概念测试、上市与生命周期管理的完整方法论。" },
-      { t: "0-1 / turnaround", d: "做过新业务从 0 到 1，或在成熟业务下滑期做过扭转。" }
-    ],
-    fit: {
-      must: "食品 / 饮料 / 零食品类 P&L 经验，品牌与销售双线操盘，能搭 30–80 人团队。",
-      plus: "餐饮 + 食品复合背景、冷链 / 冷冻食品、会员制零售、股权激励环境适应。",
-      risk: "只做品牌没碰渠道、只做销售没做产品定义、纯外资总部空降、国内传统食饮（白象 / 康师傅 / 统一 / 海天）背景、颐海现任或近期高管。"
-    },
-    pools: [
-      {
-        tier: 1,
-        label: "核心池 · 食品饮料零食 MNC",
-        desc: "品类与渠道结构最接近，方法论完整。",
-        companies: [
-          { name: "亿滋中国", why: "奥利奥双平台改革，零食品类与海底捞零食 / 自热锅最接近；市场与发展 VP 刚离任，出现窗口。" },
-          { name: "雀巢中国", why: "太太乐（调味品）、徐福记（零食）、雀巢咖啡（即饮）三个 BU 与海底捞高度重合。" },
-          { name: "百事食品", why: "乐事、桂格等零食业务，全渠道与 KA 能力强。" },
-          { name: "玛氏箭牌", why: "巧克力与口香糖 KA、分销深度行业第一梯队；高管流动率低。" },
-          { name: "可口可乐装瓶（太古 / 中粮）", why: "深度分销与现饮 / 即饮渠道，适合渠道侧候选人。" },
-          { name: "费列罗中国", why: "连续两年超额完成销售与利润指标，高端礼品 + 渠道精耕。" }
-        ]
-      },
-      {
-        tier: 2,
-        label: "参考池 · 个护美妆 MNC",
-        desc: "品牌管理与高端化方法论可参考，品类距离较远。",
-        companies: [
-          { name: "宝洁中国", why: "品牌经理制与 CMK 消费者洞察的黄埔军校，输出大量食品饮料高管。" },
-          { name: "联合利华中国", why: "MT 体系品牌 + 客户发展双线培养，冰淇淋业务分拆后出现人事窗口。" },
-          { name: "欧莱雅中国", why: "品牌矩阵管理与高端化打法，可作为方法论参考。" }
-        ]
-      },
-      {
-        tier: 3,
-        label: "第二曲线 · MNC 系转民企",
-        desc: "已完成从外企到民企的转身，落地速度更快。",
-        companies: [
-          { name: "上海家化 · 林小海", why: "P&G 营销总裁 → 阿里零售通 → 大润发 CEO → 上海家化董事长，品牌 + 渠道 + P&L 最完整。" },
-          { name: "雀巢徐福记 · 王斌", why: "P&G → 立白 / 华为 / 蒙牛 / 白象 → 雀巢徐福记 CEO，刚接手 70 亿规模业务。" },
-          { name: "太太乐 · 曹辉", why: "前 CEO，2026 年 4 月离职空窗，中式调味品直接对标火锅底料。" },
-          { name: "亿滋 · 曲向明", why: "前大中华区市场与发展 VP，2026 年 9 月离任，处于看机会窗口。" },
-          { name: "王小卤 · 赵鹏", why: "原不凡帝范梅勒中国区销售总监，现营销 VP，糖果分销经验可迁移。" }
-        ]
-      }
-    ],
-    shortlist: [
-      { name: "曹辉", company: "前太太乐 / 雀巢", title: "前 CEO · 烹调食品负责人", note: "中式调味品直接对标火锅底料，带过完整 P&L；2026 年 4 月离职空窗，谈判窗口最佳。", tier: 1, status: "P1 · 空窗" },
-      { name: "曲向明", company: "前亿滋中国", title: "前市场与发展部 VP", note: "市场 + 发展双线 VP，2026 年 9 月离任；10–11 月为黄金接触期，需确认是否仍看 MNC 机会。", tier: 1, status: "P1 · 空窗" },
-      { name: "陈博", company: "亿滋中国", title: "奥利奥核心业务负责人", note: "联合利华 MT + 可口可乐 + 亿滋零食，35–40 岁黄金期；刚上任 4 个月，先以交流建联。", tier: 1, status: "P1 · 在职" },
-      { name: "罗慧芬", company: "梦龙 / 和路雪中国", title: "董事长 / 中国业务负责人", note: "冷冻食品 + 客户发展双线，与冷链零售高度对标；分拆 IPO 期位置稳固。", tier: 2, status: "P2 · 经营" },
-      { name: "姜海英", company: "百事中国", title: "饮料 CMO", note: "原雀巢咖啡中国掌门人，饮料品牌操盘强；P&L 与销售管理需验证。", tier: 2, status: "P2 · 经营" },
-      { name: "张甦毅", company: "费列罗中国", title: "中国区总经理", note: "连续两年超额完成销售与利润，巧克力品类与零食周边可迁移。", tier: 2, status: "P2 · 弱联系" },
-      { name: "林小海", company: "上海家化", title: "董事长兼 CEO", note: "品牌 + 渠道 + P&L + 上市公司治理最完整样本；品类为个护，薪酬预期极高。", tier: 3, status: "P3 · 终极备选" },
-      { name: "罗沁心", company: "亿滋中国", title: "奥利奥增长平台负责人", note: "从 0 到 1 新业务操盘，偏品牌侧；更适合作为市场 / 产品负责人储备。", tier: 3, status: "P3 · 储备" }
-    ],
-    tables: [
-      {
-        title: "薪酬带宽参考（年总包）",
-        columns: ["层级", "MNC 在华", "民营 / 创业业务", "说明"],
-        rows: [
-          ["品牌经理 / 高级品牌经理", "40–70 万", "60–120 万", "公开 JD：糖果品牌经理 40–50 万"],
-          ["市场总监 / 销售总监", "80–150 万", "150–300 万", "快消 VP / 总经理 150–200k × 15 薪"],
-          ["BU GM / 市场 VP / 销售 VP", "120–250 万", "300–600 万", "10+ 年 FMCG Exec 1.2–2M+"],
-          ["中国区总裁 / 一号位", "300–800 万 + 长期激励", "600–1500 万 + 期权", "管 10 亿美元以上生意"]
-        ]
-      }
-    ],
-    map: [
-      {
-        group: "宝洁 / 联合利华",
-        companies: [
-          { name: "宝洁中国", people: [{ name: "许敏", title: "大中华区董事长兼 CEO" }, { name: "林小海", title: "前大中华区营销总裁 · 现上海家化" }] },
-          { name: "联合利华中国", people: [{ name: "陈戈", title: "中国区总裁" }, { name: "李怡", title: "中国区 CMO" }, { name: "罗慧芬", title: "梦龙 / 和路雪中国负责人" }] }
-        ]
-      },
-      {
-        group: "亿滋 / 玛氏 / 费列罗",
-        companies: [
-          { name: "亿滋中国", people: [{ name: "范睿思", title: "大中华区总裁" }, { name: "陈博", title: "奥利奥核心业务负责人" }, { name: "罗沁心", title: "奥利奥增长平台负责人" }, { name: "汤俊章", title: "奥利奥品牌负责人" }, { name: "曲向明", title: "前市场与发展 VP（离任）" }] },
-          { name: "玛氏箭牌", people: [{ name: "冯刘", title: "休闲食品中国总裁" }, { name: "麦伟坚", title: "中国区总裁" }] },
-          { name: "费列罗中国", people: [{ name: "张甦毅", title: "中国区总经理" }] }
-        ]
-      },
-      {
-        group: "饮料 / 咖啡 / 调味",
-        companies: [
-          { name: "太古可口可乐", people: [{ name: "苏薇", title: "集团 CEO" }, { name: "金忆", title: "大中华区 CEO" }, { name: "党建", title: "中国区 CEO" }] },
-          { name: "中粮可口可乐", people: [{ name: "展在中", title: "行政总裁" }] },
-          { name: "百事中国", people: [{ name: "Anne Tse", title: "亚太区 CEO" }, { name: "盛瑞涵", title: "百事食品中国总经理" }, { name: "姜海英", title: "大中华区饮料 CMO" }] },
-          { name: "雀巢中国", people: [{ name: "马凯思", title: "大中华区董事长兼 CEO" }, { name: "王斌", title: "徐福记 CEO" }, { name: "曹辉", title: "前太太乐 CEO（空窗）" }] }
-        ]
-      },
-      {
-        group: "其他 MNC / 第二曲线",
-        companies: [
-          { name: "达能 / 金佰利 / 汉高", people: [{ name: "谢伟博", title: "达能亚太区总裁" }, { name: "郭巍", title: "金佰利中国董事长" }, { name: "安娜", title: "汉高大中华区总裁" }] },
-          { name: "MNC 系转民企", people: [{ name: "黄锦峰", title: "逸仙集团创始人" }, { name: "赵鹏", title: "王小卤营销 VP" }] }
-        ]
-      }
-    ],
-    keywords: ["零售业务负责人", "品类 GM", "BU GM", "市场 VP / 销售 VP", "自有品牌", "Trade Marketing", "KA 渠道", "P&L"],
-    interview: [
-      "P&L 成色：管的生意多大、毛利与费用结构如何、本人对损益的决策权到哪里。",
-      "双线能力：品牌与销售各做过多久，如何协同而不是互相甩锅。",
-      "从 0 到 1：新业务第一年的目标怎么定，前 6 个月做什么。",
-      "渠道落地：KA、经销商、电商、O2O、特通各自打法与资源。",
-      "组织：12 个月内怎么搭 30–80 人团队，如何与餐饮主业协同。"
-    ],
-    risk: "本岗明确排除国内传统食饮公司与颐海国际现任 / 近期高管；MNC 高管需给足 Title、授权与长期激励，否则难成交。"
-  },
-{
-    id: "westfast",
-    no: "10",
-    name: "西快负责人",
-    dept: "西快",
-    owner: "王静",
-    deadline: "2026-11-20",
-    source: {
-      label: "西快营运负责人_人才mapping",
-      url: "https://haidilao.feishu.cn/docx/NoBdd5egxoj1eMx6uIjc7rLcn8b"
-    },
-    oneLiner: "从零定义一个汉堡品牌，并把它开到几十上百家。",
-    positioning: [
-      "0-1 搭建西式快餐独立品牌：产品定义、供应链搭建、门店模型打磨、单店跑通、拓店模型、财务模型与团队搭建全链路操盘。",
-      "适配直营管理体系，具备标准化、成本管控、门店 SOP 与数字化能力，未来可规模化复制。"
-    ],
-    scope: ["品牌 0-1", "产品定义", "单店模型", "直营拓店", "中台搭建"],
-    capabilities: [
-      { t: "0-1 操盘", d: "完整跑通单店模型，能独立搭产品体系、供应链、SOP 与投资测算。" },
-      { t: "快餐供应链", d: "熟悉中央厨房、预制食材、损耗管控与供应链成本结构。" },
-      { t: "中台搭建", d: "能组建产品、营运、开发、供应链、市场团队。" },
-      { t: "复制与模型", d: "懂商场店 / 街边店多场景选址，能设计可复制的加盟或直营模型。" }
-    ],
-    fit: {
-      must: "餐饮新品牌 0-1 完整操盘，跑通单店模型并有直营扩张经验。",
-      plus: "汉堡 / 西快品类、数字化与会员、外卖运营、快餐排班与人效管理。",
-      risk: "纯加盟品牌创始人、只做存量成熟品牌的区域营运负责人、高端西餐 / 精品汉堡单店主理人。"
-    },
-    pools: [
-      {
-        tier: 1,
-        label: "A 组 · 国际头部西式快餐",
-        desc: "体系、标准化与供应链强，优先找新业务孵化线。",
-        companies: [
-          { name: "百胜 · 塔可贝尔", why: "品牌总经理与本土团队完整，新品类孵化场景最接近。" },
-          { name: "汉堡王中国", why: "本土化与加盟 / 直营并行，区域总经理层可接触。" },
-          { name: "麦当劳中国", why: "创新中心与新品类负责人优先；存量区域营运负责人不适配 0-1。" },
-          { name: "摩斯汉堡 / Wendy's / 卡乐星", why: "中国区总经理层级，品牌与拓店经验完整。" },
-          { name: "Shake Shack / Five Guys", why: "高端汉堡中国区负责人，产品与体验强，规模化需验证。" }
-        ]
-      },
-      {
-        tier: 2,
-        label: "B 组 · 本土西式快餐新锐",
-        desc: "0-1 到千店，本土化与低成本模型最强。",
-        companies: [
-          { name: "塔斯汀", why: "产品总监、供应链负责人、直营项目负责人优先；创始人为备选。" },
-          { name: "华莱士", why: "本土万店模型，创始人层可作战略参考，直营适配需评估。" },
-          { name: "派乐汉堡 / 德克士", why: "品牌总经理与营运总监层，本土化与加盟体系成熟。" },
-          { name: "享哆味 / 乐堡士 / 百基拉 / 迈德思客 / 波客派", why: "区域新锐创始人池，重点筛直营体系操盘人。" }
-        ]
-      },
-      {
-        tier: 3,
-        label: "C 组 · 集团孵化 / 跨界",
-        desc: "集团内 0-1 孵化，组织文化易适配。",
-        companies: [
-          { name: "魏斯理汉堡", why: "创始人具备新品牌从 0 起盘经验，可作备选。" },
-          { name: "牛约堡 / 沙朗阿甘 / 猪拉虎", why: "本土新锐品牌创始人，产品创新与单店运营强。" },
-          { name: "谢谢妈妈炸鸡", why: "中国区负责人，韩式炸鸡本土化运营经验。" }
-        ]
-      }
-    ],
-    shortlist: [
-      { name: "赵旻琪", company: "塔可贝尔（塔可钟）", title: "品牌总经理", note: "百胜体系新品类品牌一号位，最贴近「国际体系 + 本土孵化」的画像。", tier: 1, status: "重点接触" },
-      { name: "林裕峯", company: "摩斯汉堡", title: "中国区总经理", note: "日系汉堡中国区操盘手，产品与门店模型成熟；扩张速度需验证。", tier: 1, status: "重点接触" },
-      { name: "杨兵", company: "塔斯汀", title: "CEO", note: "本土万店品牌操盘，0-1 到规模化完整经历；加盟底色需评估。", tier: 1, status: "高难度" },
-      { name: "汪涛", company: "肯德基", title: "品牌总经理", note: "国际体系品牌管理成熟；偏存量运维，0-1 孵化经验需验证。", tier: 1, status: "需验证" },
-      { name: "黄健", company: "Wendy's 温蒂汉堡", title: "中国区负责人", note: "国际品牌中国重启阶段，兼具 0-1 与体系化；规模尚小。", tier: 1, status: "可接触" },
-      { name: "顾炜", company: "卡乐星 Carl's Jr", title: "中国区总经理", note: "国际汉堡品牌中国区负责人，产品与门店运营经验完整。", tier: 2, status: "可接触" },
-      { name: "魏友纯", company: "塔斯汀", title: "创始人 / 执行董事", note: "创业背景与本土化洞察强，雇佣适配度需单独评估。", tier: 2, status: "备选" },
-      { name: "吕爱军", company: "汉堡王中国", title: "华东区域总经理", note: "区域营运与拓店经验，适合作为营运 / 开发副手。", tier: 3, status: "储备" }
-    ],
-    map: [
-      {
-        group: "国际头部西式快餐",
-        companies: [
-          { name: "塔可贝尔", people: [{ name: "赵旻琪", title: "品牌总经理" }] },
-          { name: "摩斯汉堡", people: [{ name: "林裕峯", title: "中国区总经理" }] },
-          { name: "Wendy's", people: [{ name: "黄健", title: "中国区负责人" }] },
-          { name: "卡乐星", people: [{ name: "顾炜", title: "中国区总经理" }] },
-          { name: "Shake Shack", people: [{ name: "陈影宏", title: "中国大陆总经理" }, { name: "谷飞", title: "华北 / 西南区域负责人" }] },
-          { name: "麦当劳中国", people: [{ name: "张家茵", title: "CEO" }, { name: "付振振", title: "四川市场营运总监" }, { name: "朱喆", title: "陕西市场营运总监" }, { name: "凌晨", title: "上海市场营运总监" }] },
-          { name: "汉堡王中国", people: [{ name: "张堃", title: "董事长 / 法定代表人" }, { name: "吕爱军", title: "华东区域总经理" }] },
-          { name: "Five Guys", people: [{ name: "赵旭", title: "中国区负责人" }] },
-          { name: "肯德基", people: [{ name: "汪涛", title: "品牌总经理" }, { name: "李学红", title: "川渝市场总经理" }] },
-          { name: "必胜客 / 赛百味", people: [{ name: "蒯俊", title: "中国总经理" }, { name: "朱富强", title: "赛百味中国区总经理" }] }
-        ]
-      },
-      {
-        group: "本土西式快餐新锐",
-        companies: [
-          { name: "塔斯汀", people: [{ name: "魏友纯", title: "创始人 / 执行董事" }, { name: "杨兵", title: "CEO" }, { name: "张先生", title: "东部大区运营总监" }] },
-          { name: "华莱士", people: [{ name: "华怀余", title: "董事长" }, { name: "华怀庆", title: "联合创始人" }] },
-          { name: "派乐汉堡", people: [{ name: "刘焕宝", title: "创始人" }] },
-          { name: "德克士", people: [{ name: "游仁贵", title: "总经理" }] },
-          { name: "享哆味 / 乐堡士 / 百基拉", people: [{ name: "陈强", title: "享哆味创始人" }, { name: "王可道", title: "乐堡士创始人" }, { name: "吴强", title: "百基拉创始人" }] },
-          { name: "迈德思客 / 波客派 / 麦立美", people: [{ name: "马兴和", title: "迈德思客创始人" }, { name: "周文煌", title: "波客派创始人" }, { name: "张磊", title: "麦立美创始人" }] }
-        ]
-      },
-      {
-        group: "集团孵化 / 跨界",
-        companies: [
-          { name: "魏斯理汉堡", people: [{ name: "李阳", title: "创始人" }] },
-          { name: "牛约堡 / 沙朗阿甘", people: [{ name: "黄涛", title: "牛约堡创始人" }, { name: "王浩", title: "沙朗阿甘创始人" }] },
-          { name: "猪拉虎 / 谢谢妈妈炸鸡", people: [{ name: "林梓琪", title: "猪拉虎创始人" }, { name: "金炅焕", title: "谢谢妈妈中国区负责人" }] }
-        ]
-      }
-    ],
-    keywords: ["西式快餐业务总经理", "汉堡品牌负责人", "快餐新品牌孵化", "0-1 搭建餐饮品牌", "塔斯汀产品总监", "快餐供应链负责人", "直营连锁拓店", "单店模型"],
-    interview: [
-      "运维还是定义：请说明从零定义产品、打磨单店模型到开出几十家的完整过程。",
-      "单店模型：投资额、回本周期、客单与毛利结构，哪些参数由本人设定。",
-      "供应链：中央厨房与预制比例如何选择，损耗与食品安全怎么管。",
-      "直营 vs 加盟：直营门店的人力、品控与督导体系怎么搭。",
-      "创业心态：在集团体系内做新品牌，如何争取资源、容忍试错。"
-    ],
-    risk: "纯加盟创始人擅长招商但直营管控差距大；国际巨头存量区域营运负责人缺少 0-1 经验，需严格区分。"
-  }
-);
-  </script>
+  
+  
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
   <script>/* ============================================================
    核心岗位人才 mapping 汇总看板 · 应用层
@@ -2000,63 +956,34 @@ window.MAPPING_ROLES.push(
 (function () {
   "use strict";
 
-  /* ---------- 数据层 ---------- */
-  var LS_KEY = "hdl_mapping_hub_v1";
-  var ORIGINAL = { meta: window.MAPPING_META, roles: window.MAPPING_ROLES };
-  function deep(o) { return JSON.parse(JSON.stringify(o)); }
-
-  /* ---------- 云端同步配置（Supabase） ----------
-     填入 url 与 anonKey 后启用：公开读取 + 实时推送；编辑需口令（数据库 RLS 校验）。
-     留空或 supabase-js 未加载时自动退回纯本地模式，功能不受影响。 */
-  var CLOUD = {
-    url: "",      /* 例：https://xxxx.supabase.co */
-    anonKey: "",  /* Supabase anon public key */
-    table: "mapping_state"
-  };
-  var cloudOn = !!(CLOUD.url && CLOUD.anonKey && window.supabase);
-  var sb = null, sbWrite = null, editKey = "", pushTimer = null, pendingRemote = null;
-  if (cloudOn) {
-    try { sb = window.supabase.createClient(CLOUD.url, CLOUD.anonKey); }
-    catch (e) { cloudOn = false; }
-  }
-
-  function pickState() {
-    var embedded = null, saved = null;
-    try {
-      var raw = document.getElementById("embedded-data").textContent.trim();
-      if (raw) embedded = JSON.parse(raw);
-    } catch (e) { embedded = null; }
-    try {
-      var ls = localStorage.getItem(LS_KEY);
-      if (ls) saved = JSON.parse(ls);
-    } catch (e) { saved = null; }
-    function ok(s) { return s && s.meta && Array.isArray(s.roles) && s.roles.length >= 0; }
-    if (ok(embedded) && ok(saved)) return (saved.stamp || 0) > (embedded.stamp || 0) ? saved : embedded;
-    if (ok(saved)) return saved;
-    if (ok(embedded)) return embedded;
-    return deep(ORIGINAL);
-  }
-
-  var S = pickState();
-  /* 营建负责人源文档链接更正（兼容旧本地存档） */
-  var BUILD_URL_OLD = "https://haidilao.feishu.cn/docx/YhCVwiqcYi4gOxkcjxfcZz2RnEc";
-  var BUILD_URL_NEW = "https://haidilao.feishu.cn/docx/DGdxdDEeQoE4vXxNJRFcwiPbnGe?302from=wiki";
-  S.roles.forEach(function (r) {
-    if (r.id === "build" && r.source && r.source.url === BUILD_URL_OLD) r.source.url = BUILD_URL_NEW;
-  });
-  var EDIT = false;
+  /* ---------- Supabase 云端数据与统一口令登录 ---------- */
+  var CLOUD = window.MAPPING_CONFIG || {};
+  var cloudOn = !!(CLOUD.supabaseUrl && CLOUD.supabaseAnonKey && CLOUD.authEmail && window.supabase);
+  var sb = null, sbWrite = null, pushTimer = null, pendingRemote = null;
+  var S = { meta: {}, roles: [] };
+  var EDIT = true; // 方案 B：所有通过统一口令验证的人均可编辑
   var query = "";
   var owner = "全部";
+  var app = document.getElementById("app");
+  var gate = document.getElementById("access-gate");
+  var loginForm = document.getElementById("access-form");
+  var loginButton = document.getElementById("access-submit");
+  var loginError = document.getElementById("access-error");
 
-  function save() {
-    S.stamp = Date.now();
-    try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch (e) { }
-    if (cloudOn && sbWrite) { setSaveState("已保存 · 云端同步中…"); queuePush(); }
-    else if (cloudOn) setSaveState("已本地保存 · 解锁编辑口令后同步云端");
-    else setSaveState("已自动保存 " + clockNow());
+  if (cloudOn) {
+    try {
+      sb = window.supabase.createClient(CLOUD.supabaseUrl, CLOUD.supabaseAnonKey, {
+        auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+      });
+    } catch (e) { cloudOn = false; }
   }
 
-  /* ---------- 云端同步 ---------- */
+  function save() {
+    S.stamp = Math.max(Date.now(), (S.stamp || 0) + 1);
+    if (cloudOn && sb) { setSaveState("已保存 · 正在同步云端…"); queuePush(); }
+    else setSaveState("云端配置缺失，请检查 config.js");
+  }
+
   function clockNow() {
     var t = new Date();
     return [t.getHours(), t.getMinutes(), t.getSeconds()].map(function (n) { return String(n).padStart(2, "0"); }).join(":");
@@ -2068,55 +995,83 @@ window.MAPPING_ROLES.push(
   function validState(s) { return s && s.meta && Array.isArray(s.roles); }
   function queuePush() {
     clearTimeout(pushTimer);
-    pushTimer = setTimeout(pushNow, 700);
+    pushTimer = setTimeout(pushNow, 650);
   }
   function pushNow() {
-    if (!sbWrite) return;
-    sbWrite.from(CLOUD.table).upsert({ id: 1, data: S, updated_at: new Date().toISOString() }).then(function (res) {
-      if (res.error) setSaveState("云端同步失败：" + (res.error.message || "请检查编辑口令"));
-      else setSaveState("已同步云端 " + clockNow());
-    });
+    if (!sbWrite || !validState(S)) return;
+    sbWrite.from(CLOUD.table || "mapping_state").upsert({ id: 1, data: S, updated_at: new Date().toISOString() })
+      .then(function (res) {
+        if (res.error) setSaveState("云端同步失败：" + (res.error.message || "请重新登录"));
+        else setSaveState("已同步云端 " + clockNow());
+      });
   }
   function applyRemote(data) {
     if (!validState(data)) return;
-    if ((data.stamp || 0) <= (S.stamp || 0)) return; /* 自己的回声或更旧的数据 */
+    if ((data.stamp || 0) <= (S.stamp || 0)) return;
     var ae = document.activeElement;
-    if (ae && ae.getAttribute && ae.getAttribute("data-path")) { pendingRemote = data; return; } /* 正在打字，稍后应用 */
+    if (ae && ae.getAttribute && ae.getAttribute("data-path")) { pendingRemote = data; return; }
     S = data;
-    try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch (e) { }
     render(true);
-    setSaveState("已同步他人更新 " + clockNow());
+    setSaveState("已同步其他人的更新 " + clockNow());
   }
-  function cloudInit() {
-    if (!cloudOn) return;
-    sb.from(CLOUD.table).select("data").eq("id", 1).maybeSingle().then(function (res) {
-      if (res.error) { setSaveState("云端连接失败：" + res.error.message); return; }
-      if (res.data && res.data.data) applyRemote(res.data.data);
-      else setSaveState("云端待初始化 · 解锁编辑后自动上传");
-      sb.channel("mapping-sync").on("postgres_changes",
-        { event: "*", schema: "public", table: CLOUD.table, filter: "id=eq.1" },
-        function (payload) {
-          var row = payload.new;
-          if (row && row.data) applyRemote(row.data);
-        }).subscribe();
+  function subscribeRealtime() {
+    sb.channel("mapping-sync")
+      .on("postgres_changes", { event: "*", schema: "public", table: CLOUD.table || "mapping_state", filter: "id=eq.1" }, function (payload) {
+        var row = payload.new;
+        if (row && row.data) applyRemote(row.data);
+      }).subscribe();
+  }
+  function showLogin(message) {
+    app.style.display = "none";
+    app.innerHTML = "";
+    S = { meta: {}, roles: [] };
+    EDIT = true;
+    gate.hidden = false;
+    loginError.textContent = message || "";
+    loginButton.disabled = false;
+    loginButton.textContent = "验证并进入看板";
+  }
+  async function loadDashboard() {
+    var result = await sb.from(CLOUD.table || "mapping_state").select("data").eq("id", 1).maybeSingle();
+    if (result.error) throw result.error;
+    if (!result.data || !validState(result.data.data)) throw new Error("数据库尚未初始化，请先运行项目中的 supabase/schema.sql");
+    S = result.data.data;
+    sbWrite = sb;
+    EDIT = true;
+    gate.hidden = true;
+    app.style.display = "";
+    render(false);
+    setSaveState("云端已连接 · 所有人均可编辑");
+    subscribeRealtime();
+  }
+  async function signInWithCode(code) {
+    if (!cloudOn) throw new Error("Supabase 尚未配置。请先在 config.js 中填写项目 URL、anon key 和共享账号邮箱。");
+    var result = await sb.auth.signInWithPassword({ email: CLOUD.authEmail, password: code });
+    if (result.error) throw new Error("口令不正确，请检查后重试。");
+    await loadDashboard();
+  }
+  async function startApp() {
+    if (!cloudOn) { showLogin("系统配置尚未完成，请联系看板管理员。"); return; }
+    loginForm.addEventListener("submit", async function (event) {
+      event.preventDefault();
+      loginButton.disabled = true;
+      loginButton.textContent = "正在验证…";
+      loginError.textContent = "";
+      try {
+        await signInWithCode(document.getElementById("access-code").value);
+        document.getElementById("access-code").value = "";
+      } catch (err) { showLogin(err.message || "登录失败，请稍后重试。"); }
+    });
+    var session = await sb.auth.getSession();
+    if (session.data && session.data.session) {
+      try { await loadDashboard(); }
+      catch (err) { await sb.auth.signOut(); showLogin(err.message || "读取云端数据失败。"); }
+    } else showLogin("");
+    sb.auth.onAuthStateChange(function (event, sessionData) {
+      if (event === "SIGNED_OUT" || !sessionData) showLogin("");
     });
   }
-  /* 编辑口令解锁：数据库端校验（RLS + check_edit_key），口令不写进页面代码 */
-  function unlockEdit(cb) {
-    if (!cloudOn || editKey) { cb(); return; }
-    var k = prompt("此看板已启用云端同步，进入编辑模式请输入编辑口令：");
-    if (!k) return;
-    setSaveState("校验口令…");
-    sb.rpc("check_edit_key", { k: k }).then(function (res) {
-      if (res.error || res.data !== true) { setSaveState(""); alert("口令不正确，无法进入编辑模式。"); return; }
-      editKey = k;
-      sbWrite = window.supabase.createClient(CLOUD.url, CLOUD.anonKey, { global: { headers: { "x-edit-key": k } } });
-      sb.from(CLOUD.table).select("id").eq("id", 1).maybeSingle().then(function (r2) {
-        if (!r2.error && !r2.data) { S.stamp = Date.now(); queuePush(); } /* 首次解锁：初始化云端数据 */
-        cb();
-      });
-    });
-  }
+  function unlockEdit(cb) { cb(); } // 已登录的共享账号拥有完整编辑权限
 
   /* ---------- 工具 ---------- */
   function esc(s) {
@@ -2244,8 +1199,7 @@ window.MAPPING_ROLES.push(
   function editHint() {
     if (!EDIT) return "";
     return '<div class="edit-hint no-print"><div class="wrap"><b>编辑模式</b><span>' +
-      (cloudOn ? "点击任意文字直接修改，自动同步到云端数据库，所有打开此页面的人实时看到更新；用 ＋ / × 新增或删除条目。多人同时编辑时以最后保存为准。"
-        : "点击任意文字直接修改（自动保存到本浏览器）；用 ＋ / × 新增或删除条目。修改完成后点「导出 HTML」生成可分享的新文件。") +
+      "所有通过访问口令的人均可编辑；修改自动保存到云端，其他在线用户实时看到更新。多人同时修改同一内容时，以最后保存的版本为准。" +
       "</span></div></div>";
   }
   function toolbarDash() {
@@ -2253,10 +1207,9 @@ window.MAPPING_ROLES.push(
       '<button class="tb-btn is-primary" data-act="add-role">＋ 新增 mapping</button>' +
       editToggleBtn() +
       '<span class="tb-sep"></span>' +
-      '<button class="tb-btn" data-act="export-html">导出 HTML</button>' +
       '<button class="tb-btn" data-act="export-json">导出 JSON</button>' +
       '<button class="tb-btn" data-act="import-json">导入 JSON</button>' +
-      '<button class="tb-btn is-danger" data-act="reset">恢复原始数据</button>' +
+      '<button class="tb-btn is-danger" data-act="logout">退出登录</button>' +
       '<span class="tb-spacer"></span>' + saveState() +
       '<input type="file" id="import-file" accept=".json,application/json" hidden>' +
       "</div></div>" + editHint();
@@ -2275,6 +1228,7 @@ window.MAPPING_ROLES.push(
       '<button class="tb-btn" data-act="print">打印 / 导出 PDF</button>' +
       editToggleBtn() +
       (EDIT ? '<button class="tb-btn is-danger" data-act="del-role">删除此 mapping</button>' : "") +
+      '<button class="tb-btn" data-act="logout">退出登录</button>' +
       '<span class="tb-spacer"></span>' + saveState() +
       "</div></div>" + editHint();
   }
@@ -2367,7 +1321,7 @@ window.MAPPING_ROLES.push(
       "<div><h3>关于这份汇总</h3>" +
       "<p>内容整理自九份岗位人才 mapping 文档，按「岗位定位 — 人才池梯队 — 重点候选人 — 完整人才地图 — 面试判断」重新组织。候选人与目标公司信息来自公开资料与内部渠道，部分标注待核实；正式接触前请再次确认现任职务、汇报线与流动意愿。</p>" +
       '<p style="margin-top:12px">品牌部负责人与主品牌市场营销负责人共用同一份 mapping 文档，合并呈现。原始文档链接保留在每个岗位标题右侧。</p>' +
-      '<p style="margin-top:12px">本看板中每份 mapping 均为独立汇报单元，可单独进入、打印与编辑；新增 mapping 后数据自动保存在本浏览器，导出 HTML 可生成包含最新内容的独立文件。</p>' +
+      '<p style="margin-top:12px">本看板中每份 mapping 均为独立汇报单元，可单独进入、打印与编辑；所有修改统一保存在云端数据库，访问者通过口令进入后可查看和编辑。</p>' +
       "</div>" +
       '<div class="footer-note">HAIDILAO · TALENT MAPPING HUB<br>COMPILED 2026.11 · ' + S.roles.length + " MAPPINGS / " + roleCount() + " ROLES<br>INTERNAL USE ONLY</div>" +
       "</div></footer>";
@@ -2566,7 +1520,6 @@ window.MAPPING_ROLES.push(
   }
 
   /* ---------- 渲染 & 路由 ---------- */
-  var app = document.getElementById("app");
   function currentRoute() {
     var m = location.hash.match(/^#\/role\/(.+)$/);
     if (m) {
@@ -2595,15 +1548,6 @@ window.MAPPING_ROLES.push(
   }
   function exportJSON() {
     download(new Blob([JSON.stringify(S, null, 2)], { type: "application/json" }), "mapping汇总数据.json");
-  }
-  function exportHTML() {
-    var clone = document.documentElement.cloneNode(true);
-    var emb = clone.querySelector("#embedded-data");
-    emb.textContent = JSON.stringify(S).replace(/<\//g, "<\\/");
-    clone.querySelector("#app").innerHTML = "";
-    clone.querySelector("body").classList.remove("edit-on");
-    var html = "<!DOCTYPE html>\n" + clone.outerHTML;
-    download(new Blob([html], { type: "text/html;charset=utf-8" }), "核心岗位人才mapping汇总看板.html");
   }
   function importJSON(file) {
     var reader = new FileReader();
@@ -2675,13 +1619,10 @@ window.MAPPING_ROLES.push(
       else { EDIT = false; render(true); }
     }
     else if (a === "print") { window.print(); }
-    else if (a === "export-html") { exportHTML(); }
     else if (a === "export-json") { exportJSON(); }
     else if (a === "import-json") { document.getElementById("import-file").click(); }
-    else if (a === "reset") {
-      if (confirm("恢复为原始数据？所有修改将被清除（建议先导出 HTML 备份）。")) {
-        unlockEdit(function () { S = deep(ORIGINAL); save(); render(false); });
-      }
+    else if (a === "logout") {
+      if (confirm("确定退出看板？下次访问需要重新输入口令。")) sb.auth.signOut();
     }
     else if (a === "add-role") {
       unlockEdit(function () {
@@ -2754,8 +1695,7 @@ window.MAPPING_ROLES.push(
   });
 
   /* ---------- 启动 ---------- */
-  render(false);
-  cloudInit();
+  startApp();
   window.addEventListener("visibilitychange", function () {
     if (document.visibilityState === "hidden" && pushTimer) { clearTimeout(pushTimer); pushNow(); }
   });
