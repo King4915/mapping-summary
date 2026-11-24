@@ -961,7 +961,7 @@ table.tbl tr:last-child td { border-bottom: 0; }
   var cloudOn = !!(CLOUD.supabaseUrl && CLOUD.supabaseAnonKey && CLOUD.authEmail && window.supabase);
   var sb = null, sbWrite = null, pushTimer = null, pendingRemote = null;
   var S = { meta: {}, roles: [] };
-  var EDIT = true; // 方案 B：所有通过统一口令验证的人均可编辑
+  var EDIT = false; // 登录后默认查看模式；需要时点击“编辑模式”
   var query = "";
   var owner = "全部";
   var app = document.getElementById("app");
@@ -1025,7 +1025,7 @@ table.tbl tr:last-child td { border-bottom: 0; }
     app.style.display = "none";
     app.innerHTML = "";
     S = { meta: {}, roles: [] };
-    EDIT = true;
+    EDIT = false;
     gate.hidden = false;
     loginError.textContent = message || "";
     loginButton.disabled = false;
@@ -1045,11 +1045,11 @@ table.tbl tr:last-child td { border-bottom: 0; }
 
     S = remoteState;
     sbWrite = sb;
-    EDIT = true;
+    EDIT = false;
     gate.hidden = true;
     app.style.display = "";
     render(false);
-    setSaveState("云端已连接 · 所有人均可编辑");
+    setSaveState("云端已连接 · 查看模式");
     // Realtime 订阅属于增强功能：订阅失败不能反过来把已登录用户踢回登录页。
     try {
       subscribeRealtime();
