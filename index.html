@@ -1067,8 +1067,13 @@ table.tbl tr:last-child td { border-bottom: 0; }
       try { await loadDashboard(); }
       catch (err) { await sb.auth.signOut(); showLogin(err.message || "读取云端数据失败。"); }
     } else showLogin("");
-    sb.auth.onAuthStateChange(function (event, sessionData) {
-      if (event === "SIGNED_OUT" || !sessionData) showLogin("");
+    // 只在明确退出登录时显示口令页。
+    // 不要用 !sessionData 判断：Supabase 的 INITIAL_SESSION 等初始化事件
+    // 可能携带 null session，迟到时会把刚登录成功的用户错误踢回口令页。
+    sb.auth.onAuthStateChange(function (event) {
+      if (event === "SIGNED_OUT") {
+        showLogin("");
+      }
     });
   }
   function unlockEdit(cb) { cb(); } // 已登录的共享账号拥有完整编辑权限
